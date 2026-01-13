@@ -1,0 +1,243 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import RiskQuestion from "./RiskQuestion";
+import { getRiskQuestions, submitRiskAssessment } from "../api/api";
+import { getCurrentUser } from "../api/auth";
+
+function RiskAssessment() {
+  const navigate = useNavigate();
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState([]);
+  const [kycStatus, setKycStatus] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingQuestions, setIsFetchingQuestions] = useState(true);
+  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsFetchingQuestions(true);
+
+        // Fetch user info
+        const user = await getCurrentUser();
+        if (!user) {
+          setError("Please log in to take the assessment.");
+          toast.error("Please log in to take the assessment.");
+          navigate("/login");
+          return;
+        }
+        setUserId(user.id);
+
+        // Fetch questions
+        const data = await getRiskQuestions();
+        setQuestions(data.questions);
+      } catch (err) {
+        setError("Failed to load questions. Please try again.");
+        toast.error("Failed to load questions. Please try again.");
+      } finally {
+        setIsFetchingQuestions(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  const handleAnswer = (questionId, score) => {
+    setAnswers((prev) => {
+      const filtered = prev.filter((a) => a.questionId !== questionId);
+      return [...filtered, { questionId, score }];
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (answers.length < questions.length) {
+      setError("Please answer all questions before submitting.");
+      toast.error("Please answer all questions before submitting.");
+      return;
+    }
+
+    if (kycStatus === null) {
+      setError("Please answer the KYC verification question.");
+      return;
+    }
+
+    if (!userId) {
+      setError("User not authenticated. Please log in again.");
+      toast.error("User not authenticated. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+
+      await submitRiskAssessment(answers, userId, kycStatus);
+      setShowToast(true);
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000)
+    } catch (err) {
+      setError("An error occurred while submitting.");
+      toast.error("Error submitting risk assessment.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isFetchingQuestions) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 text-center">
+        <p className="text-gray-600">Loading questions...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 py-12">
+      <div className="max-w-5xl mx-auto px-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/home")}
+          className="mb-6 flex items-center text-purple-600 hover:text-purple-800 font-medium transition-colors"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </button>
+
+        <div className="mb-12 text-center">
+          <div className="inline-block p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-6">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            Risk Assessment Questionnaire
+          </h1>
+          <p className="text-gray-600 mb-6 text-lg">Help us understand your investment preferences</p>
+        </div>
+
+        {/* Fixed Progress Bar */}
+        <div className="sticky top-0 z-10 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 py-4 mb-8">
+          <div className="w-3/4 mx-auto">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-purple-600">Progress</span>
+              <span className="text-sm font-semibold text-purple-700">{answers.length}/{questions.length} completed</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 ease-out rounded-full"
+                style={{ width: `${(answers.length / questions.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-8 py-5 rounded-lg mb-8 shadow-sm">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 mr-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">{error}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {questions.map((q, index) => (
+            <div key={q.question_id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-8">
+              <RiskQuestion
+                question={`${index + 1}. ${q.question}`}
+                options={q.options}
+                onAnswer={(score) => handleAnswer(q.question_id, score)}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* KYC Status Question */}
+        <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-8 mt-6">
+          <h3 className="text-lg font-semibold mb-3">
+            {questions.length + 1}. Has your KYC (Know Your Customer) been verified?
+          </h3>
+          <div className="space-y-2">
+            <button
+              onClick={() => setKycStatus("verified")}
+              className={`w-full text-left px-4 py-3 rounded border transition
+                ${
+                  kycStatus === "verified"
+                    ? "bg-purple-600 text-white border-purple-600"
+                    : "hover:bg-purple-100 border-gray-300"
+                }
+              `}
+            >
+              Yes, my KYC is verified
+            </button>
+            <button
+              onClick={() => setKycStatus("unverified")}
+              className={`w-full text-left px-4 py-3 rounded border transition
+                ${
+                  kycStatus === "unverified"
+                    ? "bg-purple-600 text-white border-purple-600"
+                    : "hover:bg-purple-100 border-gray-300"
+                }
+              `}
+            >
+              No, my KYC is not verified
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-12 flex justify-center pb-8">
+          <button
+            onClick={handleSubmit}
+            disabled={answers.length < questions.length || kycStatus === null || isLoading}
+            className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 transform shadow-md
+              ${
+                answers.length < questions.length || kycStatus === null || isLoading
+                  ? "bg-gray-400 cursor-not-allowed opacity-60"
+                  : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-105 hover:shadow-lg"
+              }
+            `}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+              </span>
+            ) : (
+              <span className="flex items-center">
+                Submit Assessment
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Success Toast */}
+        {showToast && (
+          <div className="fixed top-8 right-8 bg-green-500 text-white px-6 py-4 rounded-lg shadow-xl flex items-center space-x-3 animate-slide-left z-50">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span className="font-semibold">Assessment submitted successfully!</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default RiskAssessment;
