@@ -98,12 +98,12 @@ function RiskAssessment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-blue-100 py-12">
       <div className="max-w-5xl mx-auto px-8">
         {/* Back Button */}
         <button
           onClick={() => navigate("/home")}
-          className="mb-6 flex items-center text-purple-600 hover:text-purple-800 font-medium transition-colors"
+          className="mb-6 flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -112,27 +112,27 @@ function RiskAssessment() {
         </button>
 
         <div className="mb-12 text-center">
-          <div className="inline-block p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-6">
+          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full mb-6">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-4">
             Risk Assessment Questionnaire
           </h1>
           <p className="text-gray-600 mb-6 text-lg">Help us understand your investment preferences</p>
         </div>
 
         {/* Fixed Progress Bar */}
-        <div className="sticky top-0 z-10 bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 py-4 mb-8">
+        <div className="sticky top-0 z-10 bg-gradient-to-br from-cyan-50 via-blue-50 to-blue-100 py-4 mb-8">
           <div className="w-3/4 mx-auto">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-purple-600">Progress</span>
-              <span className="text-sm font-semibold text-purple-700">{answers.length}/{questions.length} completed</span>
+              <span className="text-sm font-medium text-blue-600">Progress</span>
+              <span className="text-sm font-semibold text-blue-700">{answers.length}/{questions.length} completed</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 ease-out rounded-full"
+                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ease-out rounded-full"
                 style={{ width: `${(answers.length / questions.length) * 100}%` }}
               ></div>
             </div>
@@ -163,34 +163,79 @@ function RiskAssessment() {
         </div>
 
         {/* KYC Status Question */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-8 mt-6">
-          <h3 className="text-lg font-semibold mb-3">
-            {questions.length + 1}. Has your KYC (Know Your Customer) been verified?
-          </h3>
-          <div className="space-y-2">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border-l-4 border-blue-500 mt-6">
+          <div className="flex items-start space-x-3 mb-6">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 leading-tight">
+              {questions.length + 1}. Has your KYC (Know Your Customer) been verified?
+            </h3>
+          </div>
+          <div className="space-y-3">
             <button
               onClick={() => setKycStatus("verified")}
-              className={`w-full text-left px-4 py-3 rounded border transition
+              className={`w-full text-left px-6 py-4 rounded-xl border-2 transition-all transform
+                flex items-center space-x-4 group
                 ${
                   kycStatus === "verified"
-                    ? "bg-purple-600 text-white border-purple-600"
-                    : "hover:bg-purple-100 border-gray-300"
+                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white border-blue-600 shadow-lg scale-[1.02]"
+                    : "bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 hover:shadow-md"
                 }
               `}
             >
-              Yes, my KYC is verified
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg
+                ${
+                  kycStatus === "verified"
+                    ? "bg-white/20 text-white"
+                    : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"
+                }
+              `}>
+                A
+              </div>
+              <span className={`flex-1 font-medium ${
+                kycStatus === "verified" ? "text-white" : "text-gray-700"
+              }`}>
+                Yes, my KYC is verified
+              </span>
+              {kycStatus === "verified" && (
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
             </button>
             <button
               onClick={() => setKycStatus("unverified")}
-              className={`w-full text-left px-4 py-3 rounded border transition
+              className={`w-full text-left px-6 py-4 rounded-xl border-2 transition-all transform
+                flex items-center space-x-4 group
                 ${
                   kycStatus === "unverified"
-                    ? "bg-purple-600 text-white border-purple-600"
-                    : "hover:bg-purple-100 border-gray-300"
+                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white border-blue-600 shadow-lg scale-[1.02]"
+                    : "bg-white hover:bg-blue-50 border-gray-200 hover:border-blue-300 hover:shadow-md"
                 }
               `}
             >
-              No, my KYC is not verified
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg
+                ${
+                  kycStatus === "unverified"
+                    ? "bg-white/20 text-white"
+                    : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"
+                }
+              `}>
+                B
+              </div>
+              <span className={`flex-1 font-medium ${
+                kycStatus === "unverified" ? "text-white" : "text-gray-700"
+              }`}>
+                No, my KYC is not verified
+              </span>
+              {kycStatus === "unverified" && (
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -203,7 +248,7 @@ function RiskAssessment() {
               ${
                 answers.length < questions.length || kycStatus === null || isLoading
                   ? "bg-gray-400 cursor-not-allowed opacity-60"
-                  : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-105 hover:shadow-lg"
+                  : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 hover:scale-105 hover:shadow-lg"
               }
             `}
           >

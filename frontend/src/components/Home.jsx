@@ -27,7 +27,7 @@ function Home() {
   const handleLogout = () => {
     logoutUser(); 
 
-    toast.error("Logout successful");
+    toast.success("Logout successful");
 
     setTimeout(() => {
       navigate("/login");

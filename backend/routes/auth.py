@@ -30,7 +30,7 @@ def signup(user: UserCreate):
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this email already exists"
+                detail="Email already registered. Please login instead."
             )
 
         # Hash the password
@@ -59,7 +59,7 @@ def signup(user: UserCreate):
         conn.close()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists"
+            detail="Email already registered. Please login instead."
         )
     except Exception as e:
         conn.rollback()
@@ -87,13 +87,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            detail="Email not found. Please check or sign up."
         )
 
     if not verify_password(form_data.password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            detail="Incorrect password. Please try again."
         )
 
     access_token = create_access_token(
@@ -114,12 +114,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         if email is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials"
+                detail="Authentication failed. Please log in."
             )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials"
+            detail="Session expired. Please log in again."
         )
 
     conn = get_db_connection()
@@ -137,7 +137,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="Account not found. Please log in again."
         )
 
     return user

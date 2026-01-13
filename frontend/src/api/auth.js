@@ -7,8 +7,7 @@ export const signupUser = async (data) => {
     const res = await axios.post(`${API_URL}/signup`, data);
     return res.data; 
   } catch (err) {
-    alert(err.response?.data?.detail || "Signup failed");
-    return null;
+    throw new Error(err.response?.data?.detail || "Signup failed");
   }
 };
 
@@ -32,8 +31,7 @@ export const loginUser = async (data) => {
     
     return res.data; 
   } catch (err) {
-    alert(err.response?.data?.detail || "Login failed");
-    return null;
+    throw new Error(err.response?.data?.detail || "Login failed");
   }
 };
 
