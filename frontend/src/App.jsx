@@ -1,8 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import Home from "./components/Home";
-import RiskAssessment from "./components/RiskAssessment";
+import Login from "./auth/Login";
+import Signup from "./auth/Signup";
+import Home from "./common/Home";
+import Goals from "./goals/Goals";
+import Investments from "./investments/Investments";
+import Transactions from "./transactions/Transactions";
+import Profile from "./profile/Profile";
+import RiskAssessment from "./risk/RiskAssessment";
 
 function App() {
   return (
@@ -12,6 +16,10 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/home" element={<Home />} />
       <Route path="/risk-assessment" element={<RiskAssessment />} />
+      <Route path="/goals" element={<Goals />} />
+      <Route path="/investments" element={<Investments />} />
+      <Route path="/transactions" element={<Transactions />} />
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   );
 }

@@ -1,0 +1,3 @@
+Start-Process -FilePath "redis-server" -WindowStyle Hidden
+
+python.exe -c "from services.price_service import update_all_investment_prices; update_all_investment_prices()"

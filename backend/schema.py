@@ -107,7 +107,8 @@ class GoalBase(BaseModel):
 
 
 class GoalCreate(GoalBase):
-    user_id: int
+    """Create model - user_id comes from JWT token"""
+    pass
 
 
 class GoalResponse(GoalBase):
@@ -132,7 +133,8 @@ class InvestmentBase(BaseModel):
 
 
 class InvestmentCreate(InvestmentBase):
-    user_id: int
+    """Create model - user_id comes from JWT token"""
+    pass
 
 
 class InvestmentResponse(InvestmentBase):
@@ -155,7 +157,8 @@ class TransactionBase(BaseModel):
 
 
 class TransactionCreate(TransactionBase):
-    user_id: int
+    """Create model - user_id comes from JWT token"""
+    asset_type: AssetType = Field(default=AssetType.stock, description="Asset type for new investments")
 
 
 class TransactionResponse(TransactionBase):

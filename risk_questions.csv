@@ -1,0 +1,6 @@
+id,question,option1,option2,option3,option1_score,option2_score,option3_score,created_at
+1,"If your investment suddenly falls by 20%, what would you most likely do?",Exit the investment to prevent further decline,Remain invested and wait for improvement,Increase investment to benefit from lower prices,2,4,6,2026-01-13 13:45:10.534305
+2,For what duration are you planning to stay invested?,Under 1 year,Between 1 and 5 years,More than 5 years,2,4,6,2026-01-13 13:45:10.534305
+3,Which option best reflects your attitude toward investing?,I focus on protecting my capital with minimal risk,I accept some risk for moderate returns,I am willing to take high risk for higher returns,2,4,6,2026-01-13 13:45:10.534305
+4,How would you rate your understanding of financial markets?,No prior experience,Some basic knowledge,Advanced understanding,2,4,6,2026-01-13 13:45:10.534305
+5,What amount of annual loss are you comfortable handling?,Maximum 5%,Between 5% and 15%,Above 15%,2,4,6,2026-01-13 13:45:10.534305

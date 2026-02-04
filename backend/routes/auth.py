@@ -75,8 +75,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # Fetch complete user data including ID, name, email
     cur.execute(
-        "SELECT id, email, password FROM users WHERE email = %s",
+        "SELECT id, name, email, password FROM users WHERE email = %s",
         (form_data.username,)
     )
     user = cur.fetchone()
@@ -96,8 +97,14 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect password. Please try again."
         )
 
+    # Create access token with user ID as 'sub' and include email and name
+    # Note: JWT 'sub' field must be a string per JWT spec
     access_token = create_access_token(
-        data={"sub": user["email"]},
+        data={
+            "sub": str(user["id"]),  # Convert user ID to string for JWT
+            "email": user["email"],
+            "name": user["name"]
+        },
         expires_delta=timedelta(minutes=45)
     )
 
@@ -106,17 +113,25 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "token_type": "bearer"
     }
 
+
 @router.get("/me")
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user_endpoint(token: str = Depends(oauth2_scheme)):
+    """Get current user info from JWT token"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        user_id_str = payload.get("sub")  # Get user ID as string from JWT
+        
+        if user_id_str is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication failed. Please log in."
             )
-    except JWTError:
+        
+        # Convert string user ID to integer for database query
+        user_id = int(user_id_str)
+        
+    except (JWTError, ValueError) as e:
+        print(f"JWT decode error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session expired. Please log in again."
@@ -125,9 +140,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # Query by user ID
     cur.execute(
-        "SELECT id, name, email, risk_profile, kyc_status, profile_completed, created_at FROM users WHERE email = %s",
-        (email,)
+        "SELECT id, name, email, risk_profile, kyc_status, profile_completed, created_at FROM users WHERE id = %s",
+        (user_id,)
     )
     user = cur.fetchone()
 

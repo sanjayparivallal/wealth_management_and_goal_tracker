@@ -14,7 +14,7 @@ def get_db_connection():
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        sslmode="require",
+        sslmode=os.getenv("DB_SSLMODE", "prefer"),
         cursor_factory=RealDictCursor
     )
 
@@ -82,7 +82,8 @@ def create_tables():
         cost_basis NUMERIC NOT NULL,
         current_value NUMERIC,
         last_price NUMERIC,
-        last_price_at TIMESTAMP
+        last_price_at TIMESTAMP,
+        CONSTRAINT unique_user_symbol UNIQUE (user_id, symbol)
     );
     """)
 

@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/auth"; 
+const API_URL = "http://localhost:8000/auth";
 
 export const signupUser = async (data) => {
   try {
     const res = await axios.post(`${API_URL}/signup`, data);
-    return res.data; 
+    return res.data;
   } catch (err) {
     throw new Error(err.response?.data?.detail || "Signup failed");
   }
@@ -22,14 +22,14 @@ export const loginUser = async (data) => {
         "Content-Type": "application/x-www-form-urlencoded"
       }
     });
-    
+
     // Store the token in localStorage
     if (res.data.access_token) {
       localStorage.setItem("access_token", res.data.access_token);
       localStorage.setItem("token_type", res.data.token_type);
     }
-    
-    return res.data; 
+
+    return res.data;
   } catch (err) {
     throw new Error(err.response?.data?.detail || "Login failed");
   }
@@ -62,10 +62,14 @@ export const getCurrentUser = async () => {
 
     return res.data;
   } catch (err) {
-    toast.error("Failed to get current user:", err);
-    return null;
+    // Don't log 401 errors - they're expected when not logged in
+    if (err.response?.status !== 401) {
+      console.error("Failed to get current user:", err);
+    }
+    throw new Error(err.response?.data?.detail || "Failed to get user info");
   }
 };
+
 
 // Check if user is authenticated
 export const isAuthenticated = () => {
