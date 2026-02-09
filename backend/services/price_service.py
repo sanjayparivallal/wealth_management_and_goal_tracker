@@ -1,12 +1,4 @@
-"""
-Price Service - Fetches and caches stock prices using yfinance and Redis.
 
-Features:
-- Fetches real-time prices from Yahoo Finance
-- Caches prices in Redis (15-minute TTL during market hours)
-- Batch updates all investments in the database
-- Designed for scheduled execution (1 AM daily)
-"""
 
 import yfinance as yf
 import redis

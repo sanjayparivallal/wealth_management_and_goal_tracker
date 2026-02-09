@@ -47,9 +47,9 @@ def get_investment_summary(current_user: dict = Depends(get_current_user)):
     cur.execute("""
         SELECT 
             COUNT(*) as total_investments,
-            SUM(cost_basis) as total_invested,
-            SUM(current_value) as total_value,
-            SUM(current_value - cost_basis) as total_gain_loss
+            COALESCE(SUM(cost_basis), 0) as total_cost_basis,
+            COALESCE(SUM(current_value), 0) as total_current_value,
+            COALESCE(SUM(current_value - cost_basis), 0) as total_gain_loss
         FROM investments
         WHERE user_id = %s
     """, (current_user["id"],))
@@ -58,7 +58,21 @@ def get_investment_summary(current_user: dict = Depends(get_current_user)):
     cur.close()
     conn.close()
     
-    return summary
+    # Calculate gain/loss percentage
+    total_cost_basis = float(summary["total_cost_basis"]) if summary["total_cost_basis"] else 0
+    total_gain_loss = float(summary["total_gain_loss"]) if summary["total_gain_loss"] else 0
+    
+    gain_loss_percentage = 0
+    if total_cost_basis > 0:
+        gain_loss_percentage = (total_gain_loss / total_cost_basis) * 100
+    
+    return {
+        "total_investments": summary["total_investments"],
+        "total_cost_basis": total_cost_basis,
+        "total_current_value": float(summary["total_current_value"]) if summary["total_current_value"] else 0,
+        "total_gain_loss": total_gain_loss,
+        "total_gain_loss_percentage": round(gain_loss_percentage, 2)
+    }
 
 
 @router.post("", response_model=dict)

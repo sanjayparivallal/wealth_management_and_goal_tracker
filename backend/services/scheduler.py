@@ -1,18 +1,4 @@
-"""
-Scheduler Service - Handles automated scheduled tasks.
 
-Schedules:
-- 1:00 AM daily: Update all investment prices from yfinance
-
-Usage:
-    from services.scheduler import start_scheduler, shutdown_scheduler
-    
-    # Start on app startup
-    start_scheduler()
-    
-    # Stop on app shutdown
-    shutdown_scheduler()
-"""
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
