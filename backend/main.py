@@ -9,25 +9,18 @@ from routes.goals import router as goals_router
 from routes.investments import router as investments_router
 from routes.transactions import router as transactions_router
 from routes.profile import router as profile_router
+from routes.simulations import router as simulations_router
 from database import get_db_connection
-from services.scheduler import start_scheduler, shutdown_scheduler
-
-
-load_dotenv()
-
-print("MAIN FILE LOADED")
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan - startup and shutdown events."""
     # Startup
     print("📦 Starting application...")
-    start_scheduler()
+    # Celery worker handles background tasks now
     yield
     # Shutdown
     print("🛑 Shutting down application...")
-    shutdown_scheduler()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -56,6 +49,7 @@ app.include_router(goals_router)
 app.include_router(investments_router)
 app.include_router(transactions_router)
 app.include_router(profile_router)
+app.include_router(simulations_router)
 
 
 @app.get("/")

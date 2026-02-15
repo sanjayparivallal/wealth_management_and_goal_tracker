@@ -8,6 +8,8 @@ import Transactions from "./transactions/Transactions";
 import Profile from "./profile/Profile";
 import RiskAssessment from "./risk/RiskAssessment";
 
+import SimulationsPage from "./simulations/SimulationsPage";
+
 function App() {
   return (
     <Routes>
@@ -20,6 +22,7 @@ function App() {
       <Route path="/investments" element={<Investments />} />
       <Route path="/transactions" element={<Transactions />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/simulations" element={<SimulationsPage />} />
     </Routes>
   );
 }

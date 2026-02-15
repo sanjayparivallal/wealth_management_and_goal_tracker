@@ -3,7 +3,7 @@ from database import get_db_connection
 from schema import InvestmentCreate
 from security import get_current_user
 from services.price_service import get_price_service, update_all_investment_prices
-from services.scheduler import get_scheduler_status, trigger_price_update_now
+# Scheduler endpoint removed (managed by Celery)
 from typing import List
 
 router = APIRouter(prefix="/investments", tags=["investments"])
@@ -178,10 +178,7 @@ def refresh_all_prices(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.get("/scheduler/status")
-def get_price_scheduler_status(current_user: dict = Depends(get_current_user)):
-    """Get the status of the price update scheduler"""
-    return get_scheduler_status()
+# Endpoint removed
 
 
 
