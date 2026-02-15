@@ -31,7 +31,6 @@ export default function Signup() {
         setName("");
         setEmail("");
         setPassword("");
-        setShowRules(false);
         
         setTimeout(() => {
           navigate("/login");

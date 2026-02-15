@@ -16,10 +16,14 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def signup(user: UserCreate):
-    conn = get_db_connection()
-    cur = conn.cursor()
+    print(f"Signup attempt for: {user.email}")
+    conn = None
+    cur = None
 
     try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
         # Check if user already exists
         cur.execute(
             "SELECT id FROM users WHERE email = %s",
@@ -48,27 +52,30 @@ def signup(user: UserCreate):
         new_user = cur.fetchone()
 
         conn.commit()
-        cur.close()
-        conn.close()
-
         return new_user
 
     except errors.UniqueViolation:
-        conn.rollback()
-        cur.close()
-        conn.close()
+        if conn:
+            conn.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered. Please login instead."
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        conn.rollback()
-        cur.close()
-        conn.close()
+        print(f"Signup Error: {str(e)}")
+        if conn:
+            conn.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred: {str(e)}"
         )
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 @router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):

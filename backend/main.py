@@ -15,7 +15,7 @@ from services.scheduler import start_scheduler, shutdown_scheduler
 
 load_dotenv()
 
-print("🚀 MAIN FILE LOADED")
+print("MAIN FILE LOADED")
 
 
 @asynccontextmanager

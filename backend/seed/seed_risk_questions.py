@@ -3,6 +3,12 @@ Script to seed risk_questions table with initial data.
 Run this once after creating the database tables.
 """
 
+import sys
+import os
+
+# Add parent directory to path to import database
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from database import get_db_connection
 
 
@@ -77,11 +83,11 @@ def seed_risk_questions():
             """, q)
         
         conn.commit()
-        print(f"✅ Successfully inserted {len(questions)} risk questions!")
+        print(f"Successfully inserted {len(questions)} risk questions!")
         
     except Exception as e:
         conn.rollback()
-        print(f"❌ Error inserting risk questions: {e}")
+        print(f"Error inserting risk questions: {e}")
         raise
     finally:
         cur.close()

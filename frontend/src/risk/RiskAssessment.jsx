@@ -133,8 +133,8 @@ export default function RiskAssessment() {
                 <div className="mb-8 max-w-2xl mx-auto">
                     <div className="flex justify-between text-sm font-medium text-gray-500 mb-2">
                         <span>
-                            {showKycQuestion 
-                                ? `KYC Verification (Final Step)` 
+                            {showKycQuestion
+                                ? `KYC Verification (Final Step)`
                                 : `Question ${currentStep + 1} of ${questions.length}`
                             }
                         </span>
@@ -167,11 +167,10 @@ export default function RiskAssessment() {
                         <div className="space-y-4">
                             <button
                                 onClick={() => handleKycSelect("verified")}
-                                className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-200 group ${
-                                    kycStatus === "verified"
-                                        ? "border-green-500 bg-green-50"
-                                        : "border-gray-100 hover:border-green-500 hover:bg-green-50"
-                                }`}
+                                className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-200 group ${kycStatus === "verified"
+                                    ? "border-green-500 bg-green-50"
+                                    : "border-gray-100 hover:border-green-500 hover:bg-green-50"
+                                    }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <svg className={`w-6 h-6 ${kycStatus === "verified" ? "text-green-600" : "text-gray-400 group-hover:text-green-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,41 +186,19 @@ export default function RiskAssessment() {
                             </button>
 
                             <button
-                                onClick={() => handleKycSelect("pending")}
-                                className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-200 group ${
-                                    kycStatus === "pending"
-                                        ? "border-yellow-500 bg-yellow-50"
-                                        : "border-gray-100 hover:border-yellow-500 hover:bg-yellow-50"
-                                }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <svg className={`w-6 h-6 ${kycStatus === "pending" ? "text-yellow-600" : "text-gray-400 group-hover:text-yellow-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <span className={`font-medium ${kycStatus === "pending" ? "text-yellow-700" : "text-gray-700 group-hover:text-yellow-700"}`}>
-                                            KYC Pending
-                                        </span>
-                                        <p className="text-sm text-gray-500">Verification is in progress or not yet started</p>
-                                    </div>
-                                </div>
-                            </button>
-
-                            <button
-                                onClick={() => handleKycSelect("not_verified")}
-                                className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-200 group ${
-                                    kycStatus === "not_verified"
+                                onClick={() => handleKycSelect("unverified")}
+                                className={`w-full text-left px-6 py-4 rounded-lg border-2 transition-all duration-200 group ${kycStatus === "unverified"
                                         ? "border-red-500 bg-red-50"
                                         : "border-gray-100 hover:border-red-500 hover:bg-red-50"
-                                }`}
+                                    }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <svg className={`w-6 h-6 ${kycStatus === "not_verified" ? "text-red-600" : "text-gray-400 group-hover:text-red-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className={`w-6 h-6 ${kycStatus === "unverified" ? "text-red-600" : "text-gray-400 group-hover:text-red-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                        <span className={`font-medium ${kycStatus === "not_verified" ? "text-red-700" : "text-gray-700 group-hover:text-red-700"}`}>
-                                            Not Verified
+                                        <span className={`font-medium ${kycStatus === "unverified" ? "text-red-700" : "text-gray-700 group-hover:text-red-700"}`}>
+                                            No, Not Verified
                                         </span>
                                         <p className="text-sm text-gray-500">I haven't completed KYC verification yet</p>
                                     </div>
