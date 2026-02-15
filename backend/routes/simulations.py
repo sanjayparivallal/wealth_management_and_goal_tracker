@@ -5,25 +5,11 @@ from services.simulation_service import SimulationService
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import json
+from schema import SimulationCreate, SimulationResponse
 
 router = APIRouter(prefix="/simulations", tags=["simulations"])
 
 # Pydantic models
-class SimulationCreate(BaseModel):
-    scenario_name: str
-    initial_amount: float
-    monthly_contribution: float
-    time_horizon_years: int
-    expected_return_rate: float
-    inflation_rate: float
-    goal_id: Optional[int] = None
-
-class SimulationResponse(BaseModel):
-    id: int
-    scenario_name: str
-    assumptions: Dict[str, Any]
-    results: Dict[str, Any]
-    created_at: Any
 
 @router.post("", response_model=SimulationResponse)
 def create_simulation(sim_data: SimulationCreate, current_user: dict = Depends(get_current_user)):

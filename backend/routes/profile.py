@@ -1,18 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from database import get_db_connection
-from security import get_current_user, hash_password
-from pydantic import BaseModel
+from security import get_current_user, hash_password, verify_password
+from schema import ProfileUpdate, PasswordChange
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
 
-class ProfileUpdate(BaseModel):
-    name: str
-
-
-class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
 
 
 @router.get("")
@@ -72,7 +65,6 @@ def update_profile(profile_data: ProfileUpdate, current_user: dict = Depends(get
 @router.put("/password")
 def change_password(password_data: PasswordChange, current_user: dict = Depends(get_current_user)):
     """Change user password"""
-    from security import verify_password
     
     conn = get_db_connection()
     cur = conn.cursor()

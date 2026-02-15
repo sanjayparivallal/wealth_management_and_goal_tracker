@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import Navbar from "../common/Navbar";
 import InvestmentsTable from "./InvestmentsTable";
 import InvestmentForm from "./InvestmentForm";
-import { getInvestments, createInvestment, updateInvestment, getInvestmentSummary } from "../api/investments";
+import { getInvestments, updateInvestment, getInvestmentSummary } from "../api/investments";
 import { getCurrentUser } from "../api/auth";
 import { InvestmentIcon } from "../common/Icons";
 
@@ -64,14 +64,11 @@ export default function Investments() {
             if (editingInvestment) {
                 await updateInvestment(editingInvestment.id, formData);
                 toast.success("Investment updated successfully");
-            } else {
-                await createInvestment(formData);
-                toast.success("Investment added successfully");
+                setShowModal(false);
+                setEditingInvestment(null);
+                resetForm();
+                fetchData();
             }
-            setShowModal(false);
-            setEditingInvestment(null);
-            resetForm();
-            fetchData();
         } catch (err) {
             toast.error(err.message);
         }
@@ -90,10 +87,6 @@ export default function Investments() {
         });
         setShowModal(true);
     };
-
-
-
-
 
     const resetForm = () => {
         setFormData({
@@ -117,7 +110,7 @@ export default function Investments() {
         <div className="min-h-screen bg-gray-50">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
@@ -137,17 +130,17 @@ export default function Investments() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                            {editingInvestment ? "Edit Investment" : "Add Investment"}
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
+                    <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-xl animate-scaleIn">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-4">
+                            Edit Investment
                         </h2>
                         <InvestmentForm
                             formData={formData}
                             setFormData={setFormData}
                             onSubmit={handleSubmit}
                             onCancel={handleCancel}
-                            isEditing={!!editingInvestment}
+                            isEditing={true}
                         />
                     </div>
                 </div>

@@ -75,34 +75,38 @@ def get_investment_summary(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.post("", response_model=dict)
-def create_investment(investment: InvestmentCreate, current_user: dict = Depends(get_current_user)):
-    """Add a new investment"""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    cur.execute("""
-        INSERT INTO investments 
-        (user_id, asset_type, symbol, units, avg_buy_price, cost_basis, current_value, last_price, last_price_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
-        RETURNING id, asset_type, symbol, units, avg_buy_price, cost_basis, current_value, last_price, last_price_at
-    """, (
-        current_user["id"],
-        investment.asset_type,
-        investment.symbol,
-        investment.units,
-        investment.avg_buy_price,
-        investment.cost_basis,
-        investment.current_value,
-        investment.last_price
-    ))
-    
-    new_investment = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    
-    return new_investment
+# @router.post("", response_model=dict)
+# def create_investment(investment: InvestmentCreate, current_user: dict = Depends(get_current_user)):
+#     """
+#     [DEPRECATED] Add a new investment
+#     Investments should now be created via transactions (buying assets).
+#     """
+#     raise HTTPException(status_code=405, detail="Manual investment creation is disabled. Please use the Transactions page to buy assets.")
+    # conn = get_db_connection()
+    # cur = conn.cursor()
+    # 
+    # cur.execute("""
+    #     INSERT INTO investments 
+    #     (user_id, asset_type, symbol, units, avg_buy_price, cost_basis, current_value, last_price, last_price_at)
+    #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+    #     RETURNING id, asset_type, symbol, units, avg_buy_price, cost_basis, current_value, last_price, last_price_at
+    # """, (
+    #     current_user["id"],
+    #     investment.asset_type,
+    #     investment.symbol,
+    #     investment.units,
+    #     investment.avg_buy_price,
+    #     investment.cost_basis,
+    #     investment.current_value,
+    #     investment.last_price
+    # ))
+    # 
+    # new_investment = cur.fetchone()
+    # conn.commit()
+    # cur.close()
+    # conn.close()
+    # 
+    # return new_investment
 
 
 @router.put("/{investment_id}", response_model=dict)

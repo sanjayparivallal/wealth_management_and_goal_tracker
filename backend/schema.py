@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Optional, Dict
+from typing import Optional, Dict, Any, List
 from datetime import datetime, date
 from enum import Enum
 
@@ -46,7 +46,7 @@ class TransactionType(str, Enum):
     withdrawal = "withdrawal"
 
 
-# ================== USERS ==================
+# ================== USERS & PROFILE ==================
 
 class UserBase(BaseModel):
     name: str
@@ -83,6 +83,15 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
+class ProfileUpdate(BaseModel):
+    name: str
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 # ================== RISK ASSESSMENT ==================
 
 class Answer(BaseModel):
@@ -91,7 +100,7 @@ class Answer(BaseModel):
 
 
 class RiskAssessmentSubmit(BaseModel):
-    answers: list[Answer]
+    answers: List[Answer]
     user_id: int
     kyc_status: str  # "verified" or "unverified"
 
@@ -193,22 +202,23 @@ class RecommendationResponse(RecommendationBase):
 
 # ================== SIMULATIONS ==================
 
-class SimulationBase(BaseModel):
+class SimulationCreate(BaseModel):
     scenario_name: str
-    assumptions: Dict
-    results: Dict
+    initial_amount: float
+    monthly_contribution: float
+    time_horizon_years: int
+    expected_return_rate: float
+    inflation_rate: float
+    goal_id: Optional[int] = None
 
 
-class SimulationCreate(SimulationBase):
-    user_id: int
-    goal_id: Optional[int]
-
-
-class SimulationResponse(SimulationBase):
+class SimulationResponse(BaseModel):
     id: int
-    user_id: int
-    goal_id: Optional[int]
-    created_at: datetime
+    scenario_name: str
+    assumptions: Dict[str, Any]
+    results: Dict[str, Any]
+    created_at: Any
+    goal_id: Optional[int] = None
 
     class Config:
         from_attributes = True
