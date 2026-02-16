@@ -123,35 +123,61 @@ def get_dashboard_summary(current_user: dict = Depends(get_current_user)):
 
 @router.get("/goals-progress", response_model=List[Dict[str, Any]])
 def get_goals_progress(current_user: dict = Depends(get_current_user)):
-    """Get progress of all active goals."""
+    """Get progress of all active goals based on monthly contributions over time."""
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Left join goals with investments to calculate progress
     cur.execute("""
         SELECT 
-            g.id, 
-            g.goal_type, 
-            g.target_amount, 
-            COALESCE(SUM(i.current_value), 0) as current_amount
-        FROM goals g
-        LEFT JOIN investments i ON g.id = i.goal_id
-        WHERE g.user_id = %s AND g.status = 'active'
-        GROUP BY g.id, g.goal_type, g.target_amount
-        ORDER BY g.target_date ASC
+            id, 
+            goal_type, 
+            target_amount,
+            monthly_contribution,
+            target_date,
+            status,
+            created_at
+        FROM goals
+        WHERE user_id = %s AND status = 'active'
+        ORDER BY target_date ASC
     """, (current_user["id"],))
     
     goals = cur.fetchall()
     cur.close()
     conn.close()
     
-    return [
-        {
+    now = datetime.now()
+    result = []
+    for row in goals:
+        target = float(row["target_amount"])
+        monthly = float(row["monthly_contribution"]) if row["monthly_contribution"] else 0
+        created = row["created_at"] if row["created_at"] else now
+        target_date = row["target_date"]
+        
+        # Calculate months since goal was created
+        months_elapsed = max(1, (now.year - created.year) * 12 + (now.month - created.month))
+        
+        # Estimated current savings = monthly contribution × months elapsed
+        current_saved = monthly * months_elapsed
+        current_saved = min(current_saved, target)  # Cap at target
+        
+        percent = (current_saved / target * 100) if target > 0 else 0
+        
+        # Calculate months remaining until target date
+        months_remaining = 0
+        if target_date:
+            td = target_date if isinstance(target_date, datetime) else datetime.combine(target_date, datetime.min.time())
+            months_remaining = max(0, (td.year - now.year) * 12 + (td.month - now.month))
+        
+        result.append({
             "id": row["id"],
             "name": row["goal_type"].replace('_', ' ').title(),
-            "target": float(row["target_amount"]),
-            "current": float(row["current_amount"]),
-            "percent": min((float(row["current_amount"]) / float(row["target_amount"]) * 100), 100) if row["target_amount"] > 0 else 0
-        }
-        for row in goals
-    ]
+            "target": target,
+            "current": round(current_saved, 2),
+            "percent": round(min(percent, 100), 1),
+            "monthly_contribution": monthly,
+            "target_date": str(target_date) if target_date else None,
+            "months_remaining": months_remaining,
+            "status": row["status"]
+        })
+    
+    return result

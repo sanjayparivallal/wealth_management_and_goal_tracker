@@ -57,56 +57,7 @@ export default function InvestmentsTable({ investments, summary, onEdit, loading
 
     return (
         <>
-            {/* Summary Cards */}
-            {summary && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <Card>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Total Investment</h3>
-                                <p className="text-2xl font-bold text-gray-900 mt-2">
-                                    {formatCurrency(summary.total_cost_basis)}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-blue-100 rounded-full">
-                                <MoneyIcon className="w-6 h-6 text-blue-600" />
-                            </div>
-                        </div>
-                    </Card>
-                    <Card>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Current Value</h3>
-                                <p className="text-2xl font-bold text-gray-900 mt-2">
-                                    {formatCurrency(summary.total_current_value)}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-indigo-100 rounded-full">
-                                <ChartIcon className="w-6 h-6 text-indigo-600" />
-                            </div>
-                        </div>
-                    </Card>
-                    <Card>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Total Gain/Loss</h3>
-                                <p className={`text-2xl font-bold mt-2 ${summary.total_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {formatCurrency(summary.total_gain_loss)}
-                                    <span className="text-sm ml-2">
-                                        ({summary.total_gain_loss_percentage?.toFixed(2)}%)
-                                    </span>
-                                </p>
-                            </div>
-                            <div className={`p-3 rounded-full ${summary.total_gain_loss >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                                {summary.total_gain_loss >= 0 
-                                    ? <TrendingUpIcon className="w-6 h-6 text-green-600" />
-                                    : <TrendingDownIcon className="w-6 h-6 text-red-600" />
-                                }
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            )}
+
 
             {/* Investments Table */}
             {investments.length === 0 ? (

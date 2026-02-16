@@ -11,7 +11,8 @@ import {
     LogoutIcon,
     WalletIcon,
     LockIcon,
-    TrendingUpIcon
+    TrendingUpIcon,
+    ShieldIcon
 } from "./Icons";
 
 export default function Navbar() {
@@ -56,6 +57,7 @@ export default function Navbar() {
         { name: "Investments", path: "/investments", icon: InvestmentIcon, requiresProfile: true },
         { name: "Transactions", path: "/transactions", icon: TransactionIcon, requiresProfile: true },
         { name: "Simulations", path: "/simulations", icon: TrendingUpIcon, requiresProfile: false },
+        { name: "Recommendations", path: "/recommendations", icon: ShieldIcon, requiresProfile: true },
         { name: "Profile", path: "/profile", icon: UserIcon, requiresProfile: false }
     ];
 

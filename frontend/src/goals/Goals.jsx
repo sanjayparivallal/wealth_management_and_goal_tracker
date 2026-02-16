@@ -154,7 +154,7 @@ export default function Goals() {
                 {/* Stats Cards */}
                 {!loading && goals.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        <Card>
+                        <Card className="border-l-4 border-l-gray-500">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-gray-100 rounded-lg">
                                     <TargetIcon className="w-6 h-6 text-gray-600" />
@@ -165,7 +165,7 @@ export default function Goals() {
                                 </div>
                             </div>
                         </Card>
-                        <Card>
+                        <Card className="border-l-4 border-l-blue-500">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 rounded-lg">
                                     <CheckIcon className="w-6 h-6 text-blue-600" />
@@ -176,7 +176,7 @@ export default function Goals() {
                                 </div>
                             </div>
                         </Card>
-                        <Card>
+                        <Card className="border-l-4 border-l-green-500">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-green-100 rounded-lg">
                                     <MoneyIcon className="w-6 h-6 text-green-600" />
@@ -187,7 +187,7 @@ export default function Goals() {
                                 </div>
                             </div>
                         </Card>
-                        <Card>
+                        <Card className="border-l-4 border-l-purple-500">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-100 rounded-lg">
                                     <CalendarIcon className="w-6 h-6 text-purple-600" />

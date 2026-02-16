@@ -104,14 +104,14 @@ export default function TransactionsTable({ transactions, summary, loading }) {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all duration-300 hover:shadow-lg ${transaction.type === 'buy'
-                                                        ? 'border-green-400 text-green-700 hover:shadow-green-200'
-                                                        : transaction.type === 'sell'
-                                                            ? 'border-red-400 text-red-700 hover:shadow-red-200'
-                                                            : 'border-purple-400 text-purple-700 hover:shadow-purple-200'
+                                                    ? 'border-green-400 text-green-700 hover:shadow-green-200'
+                                                    : transaction.type === 'sell'
+                                                        ? 'border-red-400 text-red-700 hover:shadow-red-200'
+                                                        : 'border-purple-400 text-purple-700 hover:shadow-purple-200'
                                                     }`}>
                                                     <span className={`p-1 rounded ${transaction.type === 'buy' ? 'bg-green-100'
-                                                            : transaction.type === 'sell' ? 'bg-red-100'
-                                                                : 'bg-purple-100'
+                                                        : transaction.type === 'sell' ? 'bg-red-100'
+                                                            : 'bg-purple-100'
                                                         }`}>
                                                         {getTypeIcon(transaction.type)}
                                                     </span>

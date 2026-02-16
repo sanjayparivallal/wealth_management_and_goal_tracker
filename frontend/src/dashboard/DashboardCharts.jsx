@@ -8,47 +8,41 @@ import {
 } from 'recharts';
 import Card from '../common/Card';
 import { ChartIcon, TargetIcon, InvestmentIcon, TrendingUpIcon } from '../common/Icons';
-import axios from 'axios';
-import { getCurrentUser } from '../api/auth';
+import axiosInstance from '../api/axiosConfig';
 
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 
 export const DashboardCharts = () => {
-    const [historyData, setHistoryData] = useState([]);
+    const [allHistoryData, setAllHistoryData] = useState([]);
     const [allocationData, setAllocationData] = useState([]);
     const [summaryData, setSummaryData] = useState({ invested: 0, current: 0 });
     const [goalsProgressData, setGoalsProgressData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedPeriod, setSelectedPeriod] = useState('1M');
 
     const [error, setError] = useState(null);
 
+    // Fetch all data once on mount (history with ALL to get full range)
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const token = localStorage.getItem('access_token');
-                if (!token) {
-                    throw new Error("No authentication token found. Please login again.");
-                }
-                const headers = { Authorization: `Bearer ${token}` };
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
                 const [historyRes, allocationRes, summaryRes, goalsRes] = await Promise.all([
-                    axios.get(`${apiUrl}/dashboard/history?period=1M`, { headers }),
-                    axios.get(`${apiUrl}/dashboard/allocation`, { headers }),
-                    axios.get(`${apiUrl}/dashboard/summary`, { headers }),
-                    axios.get(`${apiUrl}/dashboard/goals-progress`, { headers })
+                    axiosInstance.get('/dashboard/history?period=ALL'),
+                    axiosInstance.get('/dashboard/allocation'),
+                    axiosInstance.get('/dashboard/summary'),
+                    axiosInstance.get('/dashboard/goals-progress')
                 ]);
 
-                setHistoryData(historyRes.data);
+                setAllHistoryData(historyRes.data);
                 setAllocationData(allocationRes.data);
                 setSummaryData(summaryRes.data);
                 setGoalsProgressData(goalsRes.data);
                 setError(null);
             } catch (err) {
                 console.error("Error fetching dashboard data:", err);
-                setError(err.message || "Failed to load dashboard data");
+                setError(err.response?.data?.detail || err.message || "Failed to load dashboard data");
             } finally {
                 setLoading(false);
             }
@@ -56,6 +50,18 @@ export const DashboardCharts = () => {
 
         fetchDashboardData();
     }, []);
+
+    // Client-side filter: slice history data based on selectedPeriod
+    const historyData = React.useMemo(() => {
+        if (!allHistoryData.length) return [];
+        const now = new Date();
+        const periodDays = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365, 'ALL': Infinity };
+        const days = periodDays[selectedPeriod] || 30;
+        if (days === Infinity) return allHistoryData;
+
+        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+        return allHistoryData.filter(d => new Date(d.date) >= cutoff);
+    }, [allHistoryData, selectedPeriod]);
 
     if (loading) {
         return <div className="animate-pulse h-64 bg-gray-200 rounded-lg mb-8"></div>;
@@ -78,19 +84,26 @@ export const DashboardCharts = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Portfolio Growth Over Time */}
-                <Card className="h-96 flex flex-col">
+                <Card className="border-l-4 border-l-indigo-500">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <TrendingUpIcon className="w-5 h-5 text-indigo-600" />
                             <h3 className="font-semibold text-gray-800">Portfolio Growth</h3>
                         </div>
-                        <select className="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option>1 Month</option>
-                            {/* Add more options later if needed */}
+                        <select
+                            className="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            value={selectedPeriod}
+                            onChange={(e) => setSelectedPeriod(e.target.value)}
+                        >
+                            <option value="1M">1 Month</option>
+                            <option value="3M">3 Months</option>
+                            <option value="6M">6 Months</option>
+                            <option value="1Y">1 Year</option>
+                            <option value="ALL">All Time</option>
                         </select>
                     </div>
-                    <div className="flex-1 w-full min-h-0">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full">
+                        <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={historyData}>
                                 <defs>
                                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -130,14 +143,14 @@ export const DashboardCharts = () => {
                 </Card>
 
                 {/* Asset Allocation Breakdown */}
-                <Card className="h-96 flex flex-col">
+                <Card className="border-l-4 border-l-emerald-500">
                     <div className="flex items-center gap-2 mb-4">
                         <ChartIcon className="w-5 h-5 text-emerald-600" />
                         <h3 className="font-semibold text-gray-800">Asset Allocation</h3>
                     </div>
-                    <div className="flex-1 w-full min-h-0">
+                    <div className="w-full h-[300px]">
                         {allocationData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={300}>
                                 <PieChart>
                                     <Pie
                                         data={allocationData}
@@ -157,7 +170,7 @@ export const DashboardCharts = () => {
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-gray-400">
+                            <div className="h-[300px] flex items-center justify-center text-gray-400">
                                 No assets found
                             </div>
                         )}
@@ -169,13 +182,13 @@ export const DashboardCharts = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Invested vs Current Value */}
-                <Card className="h-80 flex flex-col">
+                <Card className="border-l-4 border-l-blue-500">
                     <div className="flex items-center gap-2 mb-4">
                         <InvestmentIcon className="w-5 h-5 text-blue-600" />
                         <h3 className="font-semibold text-gray-800">Performance Summary</h3>
                     </div>
-                    <div className="flex-1 w-full min-h-0">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="w-full">
+                        <ResponsiveContainer width="100%" height={250}>
                             <BarChart
                                 data={[
                                     { name: 'Invested', amount: summaryData.invested, fill: '#94a3b8' },
@@ -204,36 +217,68 @@ export const DashboardCharts = () => {
                 </Card>
 
                 {/* Goal Progress Tracking */}
-                <Card className="h-80 flex flex-col overflow-hidden">
-                    <div className="flex items-center gap-2 mb-4">
-                        <TargetIcon className="w-5 h-5 text-orange-600" />
-                        <h3 className="font-semibold text-gray-800">Goal Progress</h3>
-                    </div>
-                    <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                        {goalsProgressData.length > 0 ? (
-                            goalsProgressData.map((goal) => (
-                                <div key={goal.id}>
-                                    <div className="flex justify-between items-end mb-1">
-                                        <span className="text-sm font-medium text-gray-700">{goal.name}</span>
-                                        <span className="text-xs text-gray-500">
-                                            {formatCurrency(goal.current)} / {formatCurrency(goal.target)}
-                                        </span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div
-                                            className="bg-orange-500 h-2.5 rounded-full transition-all duration-500"
-                                            style={{ width: `${goal.percent}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                                <p>No active goals linked to investments.</p>
-                                <p className="text-xs mt-2">Link investments to goals to see progress.</p>
-                            </div>
+                <Card className="overflow-hidden border-l-4 border-l-orange-500">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <TargetIcon className="w-5 h-5 text-orange-600" />
+                            <h3 className="font-semibold text-gray-800">Goal Progress</h3>
+                        </div>
+                        {goalsProgressData.length > 0 && (
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                {goalsProgressData.length} active
+                            </span>
                         )}
                     </div>
+                    {goalsProgressData.length > 0 ? (
+                        <div className="space-y-3">
+                            {goalsProgressData.map((goal) => {
+                                const goalConfig = {
+                                    'Retirement': { emoji: '🏖️', bg: 'bg-blue-50', border: 'border-blue-200' },
+                                    'Home': { emoji: '🏠', bg: 'bg-green-50', border: 'border-green-200' },
+                                    'Education': { emoji: '🎓', bg: 'bg-purple-50', border: 'border-purple-200' },
+                                    'Custom': { emoji: '🎯', bg: 'bg-orange-50', border: 'border-orange-200' }
+                                }[goal.name] || { emoji: '🎯', bg: 'bg-gray-50', border: 'border-gray-200' };
+                                const progressColor = goal.percent >= 75 ? '#10b981' : goal.percent >= 40 ? '#eab308' : '#f97316';
+                                return (
+                                    <div key={goal.id} className="group">
+                                        <div className="flex items-center gap-3 mb-1.5">
+                                            <span className={`w-9 h-9 flex items-center justify-center rounded-lg ${goalConfig.bg} border ${goalConfig.border} text-base flex-shrink-0`}>
+                                                {goalConfig.emoji}
+                                            </span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-semibold text-gray-800">{goal.name}</span>
+                                                    <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ color: progressColor, backgroundColor: `${progressColor}15` }}>
+                                                        {goal.percent.toFixed(1)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="ml-12">
+                                            <div className="w-full bg-gray-100 rounded-full h-2.5 mb-1">
+                                                <div className="h-2.5 rounded-full transition-all duration-700 ease-out"
+                                                    style={{ width: `${Math.max(goal.percent, 2)}%`, backgroundColor: progressColor }}
+                                                ></div>
+                                            </div>
+                                            <div className="flex justify-between text-xs text-gray-400">
+                                                <span>{formatCurrency(goal.current)} of {formatCurrency(goal.target)}</span>
+                                                <span>
+                                                    {goal.monthly_contribution > 0 && `${formatCurrency(goal.monthly_contribution)}/mo`}
+                                                    {goal.months_remaining > 0 && ` · ${goal.months_remaining}mo`}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400 py-10">
+                            <TargetIcon className="w-12 h-12 text-gray-300 mb-3" />
+                            <p className="font-medium">No active goals yet.</p>
+                            <p className="text-xs mt-1">Create goals to track your progress here.</p>
+                        </div>
+                    )}
                 </Card>
             </div>
 

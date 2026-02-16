@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
-import Home from "./common/Home";
+import Home from "./dashboard/Home";
 import Goals from "./goals/Goals";
 import Investments from "./investments/Investments";
 import Transactions from "./transactions/Transactions";
@@ -9,6 +9,7 @@ import Profile from "./profile/Profile";
 import RiskAssessment from "./risk/RiskAssessment";
 
 import SimulationsPage from "./simulations/SimulationsPage";
+import RecommendationsPage from "./recommendations/RecommendationsPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/transactions" element={<Transactions />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/simulations" element={<SimulationsPage />} />
+      <Route path="/recommendations" element={<RecommendationsPage />} />
     </Routes>
   );
 }

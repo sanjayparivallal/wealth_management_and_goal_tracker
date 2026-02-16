@@ -1,12 +1,12 @@
 import { getCurrentUser } from "../api/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Navbar from "./Navbar";
-import Card from "./Card";
-import { DashboardIcon, RiskIcon, TargetIcon, CheckIcon, MoneyIcon, InvestmentIcon, TrendingUpIcon, TransactionIcon, ChartIcon, CalendarIcon, RefreshIcon } from "./Icons";
-import { DashboardSkeleton } from "./Skeleton";
-import DashboardCharts from "../components/DashboardCharts";
+import Navbar from "../common/Navbar";
+import Card from "../common/Card";
+import { DashboardIcon, RiskIcon, TargetIcon, CheckIcon, MoneyIcon, InvestmentIcon, TrendingUpIcon, TransactionIcon, ChartIcon, CalendarIcon, RefreshIcon } from "../common/Icons";
+import { DashboardSkeleton } from "../common/Skeleton";
+import DashboardCharts from "./DashboardCharts";
 import { getGoals } from "../api/goals";
 import { getInvestments, getInvestmentSummary } from "../api/investments";
 import { getTransactions, getTransactionSummary } from "../api/transactions";
@@ -61,19 +61,23 @@ function Home() {
   // Calculate Investment Stats
   const investmentStats = {
     totalInvestments: investments.length,
-    totalValue: investmentSummary?.total_current_value || investments.reduce((sum, i) => sum + (parseFloat(i.current_value) || 0), 0),
-    totalCost: investmentSummary?.total_cost_basis || investments.reduce((sum, i) => sum + (parseFloat(i.cost_basis) || 0), 0),
-    totalGainLoss: investmentSummary?.total_gain_loss || 0,
-    gainLossPercent: investmentSummary?.total_gain_loss_percent || 0
+    totalValue: investments.reduce((sum, i) => sum + (parseFloat(i.current_value) || 0), 0),
+    totalCost: investments.reduce((sum, i) => sum + (parseFloat(i.cost_basis) || 0), 0),
+    totalGainLoss: investments.reduce((sum, i) => sum + ((parseFloat(i.current_value) || 0) - (parseFloat(i.cost_basis) || 0)), 0),
+    gainLossPercent: (() => {
+      const totalCost = investments.reduce((sum, i) => sum + (parseFloat(i.cost_basis) || 0), 0);
+      const totalValue = investments.reduce((sum, i) => sum + (parseFloat(i.current_value) || 0), 0);
+      return totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+    })()
   };
 
   // Calculate Transaction Stats
   const transactionStats = {
     totalTransactions: transactions.length,
-    buyTransactions: transactionSummary?.total_buy_transactions || transactions.filter(t => t.type === "buy").length,
-    sellTransactions: transactionSummary?.total_sell_transactions || transactions.filter(t => t.type === "sell").length,
-    totalBuyValue: transactionSummary?.total_buy_value || 0,
-    totalSellValue: transactionSummary?.total_sell_value || 0
+    buyTransactions: transactions.filter(t => t.type === "buy").length,
+    sellTransactions: transactions.filter(t => t.type === "sell").length,
+    totalBuyValue: transactions.filter(t => t.type === "buy").reduce((sum, t) => sum + ((parseFloat(t.quantity) * parseFloat(t.price)) || 0), 0),
+    totalSellValue: transactions.filter(t => t.type === "sell").reduce((sum, t) => sum + ((parseFloat(t.quantity) * parseFloat(t.price)) || 0), 0)
   };
 
   const formatCurrency = (amount) => {
@@ -86,6 +90,15 @@ function Home() {
   const formatPercent = (value) => {
     return `${value >= 0 ? "+" : ""}${(value || 0).toFixed(2)}%`;
   };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+
 
   if (loading) {
     return <DashboardSkeleton />;
@@ -124,15 +137,33 @@ function Home() {
         )}
 
         <Card className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <DashboardIcon className="w-8 h-8 text-indigo-600" />
-            <h2 className="text-3xl font-bold text-gray-800">
-              Welcome back, {user?.username || "User"}! 👋
-            </h2>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <DashboardIcon className="w-8 h-8 text-indigo-600" />
+                <h2 className="text-3xl font-bold text-gray-800">
+                  {getGreeting()}, {user?.name || "User"}! 👋
+                </h2>
+              </div>
+              <p className="text-gray-600">
+                Here's an overview of your wealth management journey.
+              </p>
+            </div>
+            <div className="hidden md:flex items-center gap-6 text-sm">
+              <div className="text-center">
+                <p className="text-gray-500">Portfolio</p>
+                <p className="text-lg font-bold text-indigo-600">{formatCurrency(investmentSummary?.total_current_value || investments.reduce((s, i) => s + (parseFloat(i.current_value) || 0), 0))}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-500">Goals</p>
+                <p className="text-lg font-bold text-orange-600">{goals.length}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-500">Trades</p>
+                <p className="text-lg font-bold text-teal-600">{transactions.length}</p>
+              </div>
+            </div>
           </div>
-          <p className="text-gray-600">
-            Here's an overview of your wealth management journey.
-          </p>
         </Card>
 
         {/* Charts Section */}
@@ -140,14 +171,19 @@ function Home() {
 
         {/* Goals Stats Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <TargetIcon className="w-6 h-6 text-orange-600" />
-            <h3 className="text-xl font-bold text-gray-800">Goals Overview</h3>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <TargetIcon className="w-6 h-6 text-orange-600" />
+              <h3 className="text-xl font-bold text-gray-800">Goals Overview</h3>
+            </div>
+            <Link to="/goals" className="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-1 transition-colors">
+              View All →
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+            <Card className="border-l-4 border-l-orange-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
+                <div className="p-2 bg-orange-50 rounded-lg">
                   <TargetIcon className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
@@ -156,9 +192,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-blue-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="p-2 bg-blue-50 rounded-lg">
                   <RefreshIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
@@ -167,9 +203,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-green-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
+                <div className="p-2 bg-green-50 rounded-lg">
                   <CheckIcon className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
@@ -178,9 +214,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-purple-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
+                <div className="p-2 bg-purple-50 rounded-lg">
                   <CalendarIcon className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
@@ -194,14 +230,19 @@ function Home() {
 
         {/* Investments Stats Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <InvestmentIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-xl font-bold text-gray-800">Portfolio Overview</h3>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <InvestmentIcon className="w-6 h-6 text-blue-600" />
+              <h3 className="text-xl font-bold text-gray-800">Portfolio Overview</h3>
+            </div>
+            <Link to="/investments" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+              View All →
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+            <Card className="border-l-4 border-l-blue-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="p-2 bg-blue-50 rounded-lg">
                   <ChartIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
@@ -210,9 +251,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-indigo-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg">
+                <div className="p-2 bg-indigo-50 rounded-lg">
                   <MoneyIcon className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div>
@@ -221,9 +262,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-cyan-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-cyan-100 rounded-lg">
+                <div className="p-2 bg-cyan-50 rounded-lg">
                   <InvestmentIcon className="w-6 h-6 text-cyan-600" />
                 </div>
                 <div>
@@ -232,9 +273,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className={`border-l-4 ${investmentStats.totalGainLoss >= 0 ? 'border-l-green-500' : 'border-l-red-500'}`}>
               <div className="flex items-center gap-3">
-                <div className={`p-2 ${investmentStats.totalGainLoss >= 0 ? 'bg-green-100' : 'bg-red-100'} rounded-lg`}>
+                <div className={`p-2 ${investmentStats.totalGainLoss >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded-lg`}>
                   <TrendingUpIcon className={`w-6 h-6 ${investmentStats.totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                 </div>
                 <div>
@@ -253,14 +294,19 @@ function Home() {
 
         {/* Transactions Stats Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <TransactionIcon className="w-6 h-6 text-teal-600" />
-            <h3 className="text-xl font-bold text-gray-800">Transaction Activity</h3>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <TransactionIcon className="w-6 h-6 text-teal-600" />
+              <h3 className="text-xl font-bold text-gray-800">Transaction Activity</h3>
+            </div>
+            <Link to="/transactions" className="text-sm font-medium text-teal-600 hover:text-teal-700 flex items-center gap-1 transition-colors">
+              View All →
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+            <Card className="border-l-4 border-l-teal-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-teal-100 rounded-lg">
+                <div className="p-2 bg-teal-50 rounded-lg">
                   <TransactionIcon className="w-6 h-6 text-teal-600" />
                 </div>
                 <div>
@@ -269,9 +315,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-emerald-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 rounded-lg">
+                <div className="p-2 bg-emerald-50 rounded-lg">
                   <TrendingUpIcon className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
@@ -281,9 +327,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-rose-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-rose-100 rounded-lg">
+                <div className="p-2 bg-rose-50 rounded-lg">
                   <TrendingUpIcon className="w-6 h-6 text-rose-600 rotate-180" />
                 </div>
                 <div>
@@ -293,9 +339,9 @@ function Home() {
                 </div>
               </div>
             </Card>
-            <Card>
+            <Card className="border-l-4 border-l-amber-500">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg">
+                <div className="p-2 bg-amber-50 rounded-lg">
                   <TargetIcon className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
