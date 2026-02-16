@@ -1,7 +1,7 @@
-import { 
-    ChartIcon, 
-    TrendingUpIcon, 
-    TrendingDownIcon, 
+import {
+    ChartIcon,
+    TrendingUpIcon,
+    TrendingDownIcon,
     MoneyIcon,
     TransactionIcon
 } from "../common/Icons";
@@ -60,44 +60,7 @@ export default function TransactionsTable({ transactions, summary, loading }) {
 
     return (
         <>
-            {/* Summary Cards */}
-            {summary && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <Card>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gray-100 rounded-lg">
-                                <ChartIcon className="w-6 h-6 text-gray-600" />
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Total Transactions</h3>
-                                <p className="text-2xl font-bold text-gray-900">{summary.total_transactions}</p>
-                            </div>
-                        </div>
-                    </Card>
-                    <Card>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-lg">
-                                <TrendingUpIcon className="w-6 h-6 text-green-600" />
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Total Buy Volume</h3>
-                                <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.total_bought)}</p>
-                            </div>
-                        </div>
-                    </Card>
-                    <Card>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-red-100 rounded-lg">
-                                <TrendingDownIcon className="w-6 h-6 text-red-600" />
-                            </div>
-                            <div>
-                                <h3 className="text-gray-500 text-sm font-medium">Total Sell Volume</h3>
-                                <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.total_sold)}</p>
-                            </div>
-                        </div>
-                    </Card>
-                </div>
-            )}
+
 
             {/* Transactions Table */}
             {transactions.length === 0 ? (
@@ -140,18 +103,16 @@ export default function TransactionsTable({ transactions, summary, loading }) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all duration-300 hover:shadow-lg ${
-                                                    transaction.type === 'buy' 
-                                                        ? 'border-green-400 text-green-700 hover:shadow-green-200' 
-                                                        : transaction.type === 'sell' 
-                                                            ? 'border-red-400 text-red-700 hover:shadow-red-200' 
+                                                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 transition-all duration-300 hover:shadow-lg ${transaction.type === 'buy'
+                                                        ? 'border-green-400 text-green-700 hover:shadow-green-200'
+                                                        : transaction.type === 'sell'
+                                                            ? 'border-red-400 text-red-700 hover:shadow-red-200'
                                                             : 'border-purple-400 text-purple-700 hover:shadow-purple-200'
-                                                }`}>
-                                                    <span className={`p-1 rounded ${
-                                                        transaction.type === 'buy' ? 'bg-green-100' 
-                                                        : transaction.type === 'sell' ? 'bg-red-100' 
-                                                        : 'bg-purple-100'
                                                     }`}>
+                                                    <span className={`p-1 rounded ${transaction.type === 'buy' ? 'bg-green-100'
+                                                            : transaction.type === 'sell' ? 'bg-red-100'
+                                                                : 'bg-purple-100'
+                                                        }`}>
                                                         {getTypeIcon(transaction.type)}
                                                     </span>
                                                     <span className="text-xs font-bold uppercase tracking-wide">{transaction.type}</span>

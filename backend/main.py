@@ -10,6 +10,7 @@ from routes.investments import router as investments_router
 from routes.transactions import router as transactions_router
 from routes.profile import router as profile_router
 from routes.simulations import router as simulations_router
+from routes.dashboard import router as dashboard_router
 from database import get_db_connection
 
 @asynccontextmanager
@@ -52,6 +53,7 @@ app.include_router(investments_router)
 app.include_router(transactions_router)
 app.include_router(profile_router)
 app.include_router(simulations_router)
+app.include_router(dashboard_router)
 
 
 @app.get("/")

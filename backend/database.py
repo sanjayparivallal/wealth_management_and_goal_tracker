@@ -142,6 +142,25 @@ def create_tables():
     );
     """)
 
+    # Portfolio History table (New)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS portfolio_history (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        total_value NUMERIC NOT NULL,
+        total_invested NUMERIC NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, date)
+    );
+    """)
+
+    # Add goal_id to investments if not exists
+    cur.execute("""
+    ALTER TABLE investments
+    ADD COLUMN IF NOT EXISTS goal_id INT REFERENCES goals(id) ON DELETE SET NULL;
+    """)
+
     conn.commit()
     cur.close()
     conn.close()

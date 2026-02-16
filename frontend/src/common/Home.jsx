@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Card from "./Card";
 import { DashboardIcon, RiskIcon, TargetIcon, CheckIcon, MoneyIcon, InvestmentIcon, TrendingUpIcon, TransactionIcon, ChartIcon, CalendarIcon, RefreshIcon } from "./Icons";
 import { DashboardSkeleton } from "./Skeleton";
+import DashboardCharts from "../components/DashboardCharts";
 import { getGoals } from "../api/goals";
 import { getInvestments, getInvestmentSummary } from "../api/investments";
 import { getTransactions, getTransactionSummary } from "../api/transactions";
@@ -133,6 +134,9 @@ function Home() {
             Here's an overview of your wealth management journey.
           </p>
         </Card>
+
+        {/* Charts Section */}
+        <DashboardCharts />
 
         {/* Goals Stats Section */}
         <div className="mb-8">

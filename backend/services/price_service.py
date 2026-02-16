@@ -271,6 +271,47 @@ def update_all_investment_prices():
             failed_count += 1
     
     conn.commit()
+    
+    # ---------------------------------------------------------
+    # RECORD PORTFOLIO HISTORY SNAPSHOT
+    # ---------------------------------------------------------
+    try:
+        # Calculate total value and invested amount for each user
+        cur.execute("""
+            SELECT 
+                user_id, 
+                SUM(current_value) as total_value, 
+                SUM(cost_basis) as total_invested
+            FROM investments
+            GROUP BY user_id
+        """)
+        user_portfolios = cur.fetchall()
+        
+        today = datetime.now().date()
+        
+        for portfolio in user_portfolios:
+            user_id = portfolio['user_id']
+            total_value = portfolio['total_value']
+            total_invested = portfolio['total_invested']
+            
+            # Insert or Update history for today
+            cur.execute("""
+                INSERT INTO portfolio_history (user_id, date, total_value, total_invested)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (user_id, date) 
+                DO UPDATE SET 
+                    total_value = EXCLUDED.total_value,
+                    total_invested = EXCLUDED.total_invested,
+                    created_at = NOW()
+            """, (user_id, today, total_value, total_invested))
+            
+        print(f"📈 Recorded portfolio history for {len(user_portfolios)} users")
+        conn.commit()
+        
+    except Exception as e:
+        print(f"❌ Error recording portfolio history: {e}")
+        conn.rollback()
+    
     cur.close()
     conn.close()
     
