@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getRecommendations } from '../api/recommendations';
 import Navbar from '../common/Navbar';
 import Card from '../common/Card';
+import { RecommendationsSkeleton } from '../common/Skeleton';
 import {
     ChartIcon,
     TrendingUpIcon,
@@ -14,7 +15,6 @@ import {
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
 } from 'recharts';
-
 
 
 const PIE_COLORS = {
@@ -53,21 +53,7 @@ const RecommendationsPage = () => {
     }, []);
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <Navbar />
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="animate-pulse space-y-6">
-                        <div className="h-32 bg-gray-200 rounded-xl"></div>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="h-80 bg-gray-200 rounded-xl"></div>
-                            <div className="h-80 bg-gray-200 rounded-xl"></div>
-                        </div>
-                        <div className="h-48 bg-gray-200 rounded-xl"></div>
-                    </div>
-                </main>
-            </div>
-        );
+        return <RecommendationsSkeleton />;
     }
 
     if (error) {
@@ -82,8 +68,6 @@ const RecommendationsPage = () => {
             </div>
         );
     }
-
-
 
     // Prepare pie chart data
     const targetPieData = Object.entries(data.target_allocation).map(([key, value]) => ({

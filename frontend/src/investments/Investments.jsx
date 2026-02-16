@@ -8,6 +8,7 @@ import InvestmentForm from "./InvestmentForm";
 import { getInvestments, updateInvestment, getInvestmentSummary } from "../api/investments";
 import { getCurrentUser } from "../api/auth";
 import { InvestmentIcon, DownloadIcon } from "../common/Icons";
+import { InvestmentsSkeleton } from "../common/Skeleton";
 
 export default function Investments() {
     const navigate = useNavigate();
@@ -25,24 +26,9 @@ export default function Investments() {
         current_value: "",
         last_price: ""
     });
-
-    useEffect(() => {
-        checkProfileAndFetch();
-    }, []);
-
-    const checkProfileAndFetch = async () => {
-        try {
-            const user = await getCurrentUser();
-            if (!user?.profile_completed) {
-                toast.warning("Please complete your risk assessment first");
-                navigate("/risk-assessment");
-                return;
-            }
-            fetchData();
-        } catch (err) {
-            navigate("/login");
-        }
-    };
+    const [filterAsset, setFilterAsset] = useState('all');
+    const [sortOrder, setSortOrder] = useState('value_desc');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchData = async () => {
         try {
@@ -58,6 +44,29 @@ export default function Investments() {
             setLoading(false);
         }
     };
+
+    const checkProfileAndFetch = async () => {
+        try {
+            const user = await getCurrentUser();
+            if (!user?.profile_completed) {
+                toast.warning("Please complete your risk assessment first");
+                navigate("/risk-assessment");
+                return;
+            }
+            fetchData();
+        } catch (err) {
+            navigate("/login");
+        }
+    };
+
+    useEffect(() => {
+        checkProfileAndFetch();
+    }, []);
+
+    if (loading) {
+        return <InvestmentsSkeleton />;
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -107,9 +116,7 @@ export default function Investments() {
         resetForm();
     };
 
-    const [filterAsset, setFilterAsset] = useState('all');
-    const [sortOrder, setSortOrder] = useState('value_desc');
-    const [searchQuery, setSearchQuery] = useState('');
+
 
     // Filter and Sort Logic
     const filteredInvestments = investments

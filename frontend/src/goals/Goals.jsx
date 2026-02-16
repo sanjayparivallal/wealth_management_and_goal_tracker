@@ -8,6 +8,7 @@ import GoalForm from "./GoalForm";
 import { getGoals, createGoal, updateGoal, deleteGoal } from "../api/goals";
 import { getCurrentUser } from "../api/auth";
 import { TargetIcon, CheckIcon, MoneyIcon, CalendarIcon, PlusIcon } from "../common/Icons";
+import { GoalsSkeleton } from "../common/Skeleton";
 
 export default function Goals() {
     const navigate = useNavigate();
@@ -23,9 +24,16 @@ export default function Goals() {
         status: "active"
     });
 
-    useEffect(() => {
-        checkProfileAndFetch();
-    }, []);
+    const fetchGoals = async () => {
+        try {
+            const data = await getGoals();
+            setGoals(data);
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const checkProfileAndFetch = async () => {
         try {
@@ -41,16 +49,13 @@ export default function Goals() {
         }
     };
 
-    const fetchGoals = async () => {
-        try {
-            const data = await getGoals();
-            setGoals(data);
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        checkProfileAndFetch();
+    }, []);
+
+    if (loading) {
+        return <GoalsSkeleton />;
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

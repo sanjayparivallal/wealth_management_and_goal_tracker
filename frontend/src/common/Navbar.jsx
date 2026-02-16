@@ -12,13 +12,16 @@ import {
     WalletIcon,
     LockIcon,
     TrendingUpIcon,
-    ShieldIcon
+    ShieldIcon,
+    MenuIcon,
+    CloseIcon
 } from "./Icons";
 
 export default function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
     const [profileCompleted, setProfileCompleted] = useState(true);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const checkProfile = async () => {
@@ -26,12 +29,16 @@ export default function Navbar() {
                 const user = await getCurrentUser();
                 setProfileCompleted(user?.profile_completed || false);
             } catch (err) {
-                // If error, assume not completed
                 setProfileCompleted(false);
             }
         };
         checkProfile();
-    }, [location.pathname]); // Re-check when route changes
+    }, [location.pathname]);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [location.pathname]);
 
     const handleLogout = () => {
         logoutUser();
@@ -64,99 +71,115 @@ export default function Navbar() {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <nav className="bg-white shadow-sm">
+        <nav className="bg-white shadow-sm sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    {/* Logo/Brand */}
-                    <div className="flex items-center">
-                        <a
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                navigate("/home");
-                            }}
-                            className="flex items-center gap-2 text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition"
-                        >
-                            <WalletIcon className="w-8 h-8" />
-                            <span>Wealth Management</span>
-                        </a>
-                    </div>
-
-                    {/* Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-6">
-                        {navItems.map((item) => {
-                            const IconComponent = item.icon;
-                            const isLocked = item.requiresProfile && !profileCompleted;
-                            return (
-                                <a
-                                    key={item.path}
-                                    href="#"
-                                    onClick={(e) => handleNavClick(e, item)}
-                                    className={`flex items-center gap-2 font-medium transition-colors duration-200 ${isLocked
-                                        ? "text-gray-400 cursor-not-allowed"
-                                        : isActive(item.path)
-                                            ? "text-indigo-600 border-b-2 border-indigo-600 pb-1"
-                                            : "text-gray-600 hover:text-indigo-600"
-                                        }`}
-                                    title={isLocked ? "Complete risk assessment to access" : ""}
-                                >
-                                    {isLocked ? (
-                                        <LockIcon className="w-4 h-4" />
-                                    ) : (
-                                        <IconComponent className="w-5 h-5" />
-                                    )}
-                                    {item.name}
-                                </a>
-                            );
-                        })}
-                    </div>
-
-                    {/* Logout Link */}
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-sm"
+                <div className="flex justify-between items-center h-14">
+                    {/* Logo/Brand — compact */}
+                    <a
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate("/home");
+                        }}
+                        className="flex items-center gap-2 text-xl font-bold text-indigo-600 hover:text-indigo-700 transition flex-shrink-0"
                     >
-                        <LogoutIcon className="w-5 h-5" />
-                        Logout
-                    </button>
-                </div>
+                        <WalletIcon className="w-7 h-7" />
+                        <span className="hidden sm:inline">WealthTracker</span>
+                    </a>
 
-                {/* Mobile Navigation */}
-                <div className="md:hidden pb-4">
-                    <div className="flex flex-col space-y-2">
+                    {/* Desktop Navigation — compact with smaller gaps */}
+                    <div className="hidden lg:flex items-center space-x-1">
                         {navItems.map((item) => {
                             const IconComponent = item.icon;
                             const isLocked = item.requiresProfile && !profileCompleted;
+                            const active = isActive(item.path);
                             return (
                                 <a
                                     key={item.path}
                                     href="#"
                                     onClick={(e) => handleNavClick(e, item)}
-                                    className={`flex items-center gap-2 py-2 font-medium transition-colors ${isLocked
-                                        ? "text-gray-400 cursor-not-allowed pl-4 bg-gray-50"
-                                        : isActive(item.path)
-                                            ? "text-indigo-600 border-l-4 border-indigo-600 pl-4 bg-indigo-50"
-                                            : "text-gray-600 hover:text-indigo-600 hover:bg-gray-50 pl-4"
+                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isLocked
+                                        ? "text-gray-400 cursor-not-allowed"
+                                        : active
+                                            ? "text-indigo-600 bg-indigo-50"
+                                            : "text-gray-600 hover:text-indigo-600 hover:bg-gray-50"
                                         }`}
+                                    title={isLocked ? "Complete risk assessment to access" : item.name}
                                 >
                                     {isLocked ? (
                                         <LockIcon className="w-4 h-4" />
                                     ) : (
-                                        <IconComponent className="w-5 h-5" />
+                                        <IconComponent className="w-4 h-4" />
                                     )}
-                                    {item.name}
+                                    <span className="hidden xl:inline">{item.name}</span>
                                 </a>
                             );
                         })}
+                    </div>
+
+                    {/* Right side — Logout + Mobile hamburger */}
+                    <div className="flex items-center gap-2">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-2 text-left w-full text-white py-2 font-medium hover:bg-red-600 pl-4 bg-red-500 rounded-lg transition duration-200 mt-2"
+                            className="hidden lg:flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-3 rounded-lg transition duration-200 text-sm"
                         >
-                            <LogoutIcon className="w-5 h-5" />
+                            <LogoutIcon className="w-4 h-4" />
                             Logout
+                        </button>
+
+                        {/* Mobile hamburger button */}
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="lg:hidden p-2 rounded-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition"
+                        >
+                            {mobileMenuOpen ? (
+                                <CloseIcon className="w-6 h-6" />
+                            ) : (
+                                <MenuIcon className="w-6 h-6" />
+                            )}
                         </button>
                     </div>
                 </div>
+
+                {/* Mobile Navigation — slide-down menu */}
+                {mobileMenuOpen && (
+                    <div className="lg:hidden border-t border-gray-100 pb-4 pt-2 animate-slideDown">
+                        <div className="flex flex-col space-y-1">
+                            {navItems.map((item) => {
+                                const IconComponent = item.icon;
+                                const isLocked = item.requiresProfile && !profileCompleted;
+                                const active = isActive(item.path);
+                                return (
+                                    <a
+                                        key={item.path}
+                                        href="#"
+                                        onClick={(e) => handleNavClick(e, item)}
+                                        className={`flex items-center gap-3 py-2.5 px-4 rounded-lg font-medium transition-colors ${isLocked
+                                            ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                                            : active
+                                                ? "text-indigo-600 bg-indigo-50"
+                                                : "text-gray-600 hover:text-indigo-600 hover:bg-gray-50"
+                                            }`}
+                                    >
+                                        {isLocked ? (
+                                            <LockIcon className="w-5 h-5" />
+                                        ) : (
+                                            <IconComponent className="w-5 h-5" />
+                                        )}
+                                        {item.name}
+                                    </a>
+                                );
+                            })}
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-3 w-full text-left text-white py-2.5 px-4 font-medium bg-red-500 hover:bg-red-600 rounded-lg transition duration-200 mt-2"
+                            >
+                                <LogoutIcon className="w-5 h-5" />
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </nav>
     );

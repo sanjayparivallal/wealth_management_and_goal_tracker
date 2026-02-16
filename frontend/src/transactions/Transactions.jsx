@@ -18,7 +18,7 @@ import {
     SortDescIcon
 } from "../common/Icons";
 import Card from "../common/Card";
-import { CardSkeleton } from "../common/Skeleton";
+import { TransactionsSkeleton } from "../common/Skeleton";
 
 export default function Transactions() {
     const navigate = useNavigate();
@@ -43,25 +43,7 @@ export default function Transactions() {
     const [filterAsset, setFilterAsset] = useState("all");
     const [sortOrder, setSortOrder] = useState("desc"); // desc (newest), asc (oldest)
 
-    useEffect(() => {
-        checkProfileAndFetch();
-    }, []);
-
-    const checkProfileAndFetch = async () => {
-        try {
-            const user = await getCurrentUser();
-            if (!user?.profile_completed) {
-                toast.warning("Please complete your risk assessment first");
-                navigate("/risk-assessment");
-                return;
-            }
-            fetchData();
-        } catch (err) {
-            navigate("/login");
-        }
-    };
-
-    const fetchData = async () => {
+    const fetchTransactions = async () => {
         try {
             const [transactionsData, summaryData] = await Promise.all([
                 getTransactions(),
@@ -75,6 +57,29 @@ export default function Transactions() {
             setLoading(false);
         }
     };
+
+    const checkProfileAndFetch = async () => {
+        try {
+            const user = await getCurrentUser();
+            if (!user?.profile_completed) {
+                toast.warning("Please complete your risk assessment first");
+                navigate("/risk-assessment");
+                return;
+            }
+            fetchTransactions();
+        } catch (err) {
+            navigate("/login");
+        }
+    };
+
+    useEffect(() => {
+        checkProfileAndFetch();
+    }, []);
+
+    if (loading) {
+        return <TransactionsSkeleton />;
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
