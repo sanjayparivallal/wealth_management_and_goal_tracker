@@ -13,7 +13,9 @@ export default function InvestmentsTable({ investments, summary, onEdit, loading
 
     const formatDateTime = (dateString) => {
         if (!dateString) return '-';
-        const date = new Date(dateString);
+        // Ensure it's treated as UTC if naive string
+        const utcString = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+        const date = new Date(utcString);
         return (
             <div className="flex flex-col">
                 <span className="font-medium text-gray-900">
