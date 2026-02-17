@@ -66,23 +66,4 @@ def root():
 def health():
     return {"status": "ok"}
 
-@app.get("/users")
-def get_users():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT 
-            id,
-            name,
-            email,
-            risk_profile,
-            kyc_status,
-            risk_score,
-            profile_completed,
-            created_at
-        FROM users
-    """)
-    users = cur.fetchall()
-    cur.close()
-    conn.close()
-    return {"users": users}
+

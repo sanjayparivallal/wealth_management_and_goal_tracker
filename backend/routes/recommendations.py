@@ -106,22 +106,22 @@ def get_recommendations(current_user: dict = Depends(get_current_user)):
         for category, target_pct in target_allocation.items():
             current_pct = current_allocation_pct.get(category, 0)
             diff = current_pct - target_pct
-            
+
             # If diff is positive, we are overweight (Reduce)
             # If diff is negative, we are underweight (Increase)
-            
+
             if abs(diff) >= THRESHOLD:
                 action = "Reduce" if diff > 0 else "Increase"
                 # Calculate absolute value to move to get back to target
-                # target_amount = total_portfolio_value * (target_pct / 100)
-                # current_amount = current_allocation_value[category]
-                # change_amount = abs(target_amount - current_amount)
-                
+                target_amount = total_portfolio_value * (target_pct / 100)
+                current_amount = current_allocation_value[category]
+                change_amount = abs(target_amount - current_amount)
+
                 suggestions.append({
                     "category": category,
                     "action": action,
-                    "message": f"{action} {category.capitalize()} exposure by {abs(round(diff, 1))}%",
-                    "reasoning": f"Current: {current_pct}%, Target: {target_pct}%"
+                    "message": f"{action} {category.capitalize()} exposure by {abs(round(diff, 1))}% (approx. ₹{round(change_amount, 2)})",
+                    "reasoning": f"Current: {current_pct}%, Target: {target_pct}%, Amount to move: ₹{round(change_amount, 2)}"
                 })
     else:
         suggestions.append({

@@ -11,8 +11,14 @@ import os
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+
+if not SECRET_KEY:
+    raise ValueError("No SECRET_KEY set for Flask application. Did you forget to run source .env?")
+if not ALGORITHM:
+    raise ValueError("No ALGORITHM set for Flask application. Did you forget to run source .env?")
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def signup(user: UserCreate):
