@@ -13,6 +13,26 @@ import axiosInstance from '../api/axiosConfig';
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
+// ─── Reusable Empty State Component ───────────────────────────────
+const EmptyState = ({ icon: Icon, iconColor, bgColor, title, description }) => (
+    <div className="flex flex-col items-center justify-center h-[280px] rounded-xl"
+        style={{ background: bgColor || 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' }}
+    >
+        <div className="relative mb-4">
+            {/* Decorative rings */}
+            <div className="absolute inset-0 -m-3 rounded-full opacity-10" style={{ border: `2px dashed ${iconColor}` }} />
+            <div className="absolute inset-0 -m-6 rounded-full opacity-5" style={{ border: `2px dashed ${iconColor}` }} />
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ background: `${iconColor}15` }}
+            >
+                <Icon className="w-7 h-7" style={{ color: iconColor }} />
+            </div>
+        </div>
+        <p className="font-semibold text-gray-600 text-sm">{title}</p>
+        <p className="text-xs text-gray-400 mt-1.5 max-w-[200px] text-center leading-relaxed">{description}</p>
+    </div>
+);
+
 
 export const DashboardCharts = () => {
     const [allHistoryData, setAllHistoryData] = useState([]);
@@ -21,6 +41,7 @@ export const DashboardCharts = () => {
     const [goalsProgressData, setGoalsProgressData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedPeriod, setSelectedPeriod] = useState('1M');
+    const [summaryPeriod, setSummaryPeriod] = useState('ALL');
 
     const [error, setError] = useState(null);
 
@@ -63,6 +84,30 @@ export const DashboardCharts = () => {
         return allHistoryData.filter(d => new Date(d.date) >= cutoff);
     }, [allHistoryData, selectedPeriod]);
 
+    // Performance Summary: compute invested vs current filtered by summaryPeriod
+    const filteredSummary = React.useMemo(() => {
+        // If ALL or no history data, use the raw summary from the API
+        if (summaryPeriod === 'ALL' || !allHistoryData.length) {
+            return { invested: summaryData.invested, current: summaryData.current };
+        }
+        const now = new Date();
+        const periodDays = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+        const days = periodDays[summaryPeriod] || 30;
+        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+        const filtered = allHistoryData.filter(d => new Date(d.date) >= cutoff);
+        if (!filtered.length) return { invested: summaryData.invested, current: summaryData.current };
+        const startPoint = filtered[0];
+        const endPoint = filtered[filtered.length - 1];
+        // Invested in this period = new money added during the period
+        const investedInPeriod = (endPoint.total_invested || 0) - (startPoint.total_invested || 0);
+        // Current value change over the period
+        const currentValueChange = (endPoint.total_value || 0) - (startPoint.total_value || 0);
+        return {
+            invested: Math.max(investedInPeriod, 0),
+            current: currentValueChange
+        };
+    }, [allHistoryData, summaryPeriod, summaryData]);
+
     if (loading) {
         return <div className="animate-pulse h-64 bg-gray-200 rounded-lg mb-8"></div>;
     }
@@ -70,6 +115,9 @@ export const DashboardCharts = () => {
     // Format currency
     const formatCurrency = (value) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(value);
+
+    // Check if performance data is empty
+    const hasPerformanceData = summaryData.invested > 0 || summaryData.current > 0;
 
     return (
         <div className="space-y-8 mb-8">
@@ -103,42 +151,52 @@ export const DashboardCharts = () => {
                         </select>
                     </div>
                     <div className="w-full">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={historyData}>
-                                <defs>
-                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                                <XAxis
-                                    dataKey="date"
-                                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    minTickGap={30}
-                                />
-                                <YAxis
-                                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                                    tickFormatter={(value) => `$${value / 1000}k`}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <Tooltip
-                                    formatter={(value) => [formatCurrency(value), 'Value']}
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="total_value"
-                                    stroke="#6366f1"
-                                    fillOpacity={1}
-                                    fill="url(#colorValue)"
-                                    strokeWidth={2}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        {historyData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <AreaChart data={historyData}>
+                                    <defs>
+                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fontSize: 12, fill: '#6b7280' }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        minTickGap={30}
+                                    />
+                                    <YAxis
+                                        tick={{ fontSize: 12, fill: '#6b7280' }}
+                                        tickFormatter={(value) => `$${value / 1000}k`}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <Tooltip
+                                        formatter={(value) => [formatCurrency(value), 'Value']}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="total_value"
+                                        stroke="#6366f1"
+                                        fillOpacity={1}
+                                        fill="url(#colorValue)"
+                                        strokeWidth={2}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState
+                                icon={TrendingUpIcon}
+                                iconColor="#6366f1"
+                                bgColor="linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)"
+                                title="No portfolio history yet"
+                                description="Add investments and track their growth over time here."
+                            />
+                        )}
                     </div>
                 </Card>
 
@@ -170,50 +228,107 @@ export const DashboardCharts = () => {
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-[300px] flex items-center justify-center text-gray-400">
-                                No assets found
-                            </div>
+                            <EmptyState
+                                icon={ChartIcon}
+                                iconColor="#10b981"
+                                bgColor="linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
+                                title="No assets to display"
+                                description="Your allocation breakdown will appear here once you add investments."
+                            />
                         )}
                     </div>
                 </Card>
             </div>
 
-            {/* Row 2: Invested vs Current & Goal Progress */}
+            {/* Row 2: Performance Summary & Goal Progress */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Invested vs Current Value */}
+                {/* Performance Summary with Period Filter */}
                 <Card className="border-l-4 border-l-blue-500">
-                    <div className="flex items-center gap-2 mb-4">
-                        <InvestmentIcon className="w-5 h-5 text-blue-600" />
-                        <h3 className="font-semibold text-gray-800">Performance Summary</h3>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <InvestmentIcon className="w-5 h-5 text-blue-600" />
+                            <h3 className="font-semibold text-gray-800">Performance Summary</h3>
+                        </div>
+                        {/* Period filter pills */}
+                        <div className="flex bg-gray-100 rounded-lg p-0.5 gap-0.5">
+                            {['1M', '3M', '6M', '1Y', 'ALL'].map((period) => (
+                                <button
+                                    key={period}
+                                    onClick={() => setSummaryPeriod(period)}
+                                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all duration-200 ${summaryPeriod === period
+                                        ? 'bg-white text-blue-700 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                >
+                                    {period === 'ALL' ? 'All' : period}
+                                </button>
+                            ))}
+                        </div>
                     </div>
+
                     <div className="w-full">
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart
-                                data={[
-                                    { name: 'Invested', amount: summaryData.invested, fill: '#94a3b8' },
-                                    { name: 'Current', amount: summaryData.current, fill: summaryData.current >= summaryData.invested ? '#10b981' : '#ef4444' }
-                                ]}
-                                layout="vertical"
-                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-                                <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#4b5563', fontWeight: 500 }} axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{ fill: 'transparent' }} formatter={(value) => formatCurrency(value)} />
-                                <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={40}>
-                                    {
-                                        [
-                                            { name: 'Invested', amount: summaryData.invested, fill: '#94a3b8' },
-                                            { name: 'Current', amount: summaryData.current, fill: summaryData.current >= summaryData.invested ? '#10b981' : '#ef4444' }
-                                        ].map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))
-                                    }
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {filteredSummary.invested === 0 && filteredSummary.current === 0 ? (
+                            <EmptyState
+                                icon={InvestmentIcon}
+                                iconColor="#3b82f6"
+                                bgColor="linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
+                                title="No investments yet"
+                                description="Start investing to compare your cost basis versus current market value."
+                            />
+                        ) : (
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart
+                                    data={[
+                                        { name: 'Invested', amount: filteredSummary.invested, fill: '#94a3b8' },
+                                        { name: 'Current', amount: filteredSummary.current, fill: filteredSummary.current >= filteredSummary.invested ? '#10b981' : '#ef4444' }
+                                    ]}
+                                    layout="vertical"
+                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
+                                    <XAxis type="number" hide />
+                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#4b5563', fontWeight: 500 }} axisLine={false} tickLine={false} />
+                                    <Tooltip cursor={{ fill: 'transparent' }} formatter={(value) => formatCurrency(value)} />
+                                    <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={40}>
+                                        {
+                                            [
+                                                { fill: '#94a3b8' },
+                                                { fill: filteredSummary.current >= filteredSummary.invested ? '#10b981' : '#ef4444' }
+                                            ].map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                                            ))
+                                        }
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
+
+                    {/* Summary stats footer */}
+                    {(filteredSummary.invested > 0 || filteredSummary.current > 0) && (
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                            <div className="text-xs text-gray-500">
+                                <span className="font-medium text-gray-700">Invested:</span> {formatCurrency(filteredSummary.invested)}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                                <span className="font-medium text-gray-700">Current:</span>{' '}
+                                <span className={filteredSummary.current >= filteredSummary.invested ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}>
+                                    {formatCurrency(filteredSummary.current)}
+                                </span>
+                            </div>
+                            <div className="text-xs">
+                                <span className={`font-bold px-1.5 py-0.5 rounded ${filteredSummary.current >= filteredSummary.invested
+                                    ? 'text-emerald-700 bg-emerald-50'
+                                    : 'text-red-700 bg-red-50'
+                                    }`}>
+                                    {filteredSummary.invested > 0
+                                        ? `${((filteredSummary.current - filteredSummary.invested) / filteredSummary.invested * 100).toFixed(1)}%`
+                                        : '0%'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 </Card>
 
                 {/* Goal Progress Tracking */}
@@ -273,11 +388,13 @@ export const DashboardCharts = () => {
                             })}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center text-gray-400 py-10">
-                            <TargetIcon className="w-12 h-12 text-gray-300 mb-3" />
-                            <p className="font-medium">No active goals yet.</p>
-                            <p className="text-xs mt-1">Create goals to track your progress here.</p>
-                        </div>
+                        <EmptyState
+                            icon={TargetIcon}
+                            iconColor="#f97316"
+                            bgColor="linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)"
+                            title="No active goals yet"
+                            description="Create financial goals to visualize and track your progress here."
+                        />
                     )}
                 </Card>
             </div>
