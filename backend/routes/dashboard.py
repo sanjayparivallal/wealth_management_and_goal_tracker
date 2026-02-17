@@ -45,6 +45,8 @@ def get_portfolio_history(period: str = "1M", current_user: dict = Depends(get_c
             WHERE user_id = %s
         """, (current_user["id"],))
         current = cur.fetchone()
+        cur.close()
+        conn.close()
         
         # Only return if there's any value
         if current and (current['total_value'] > 0 or current['total_invested'] > 0):
