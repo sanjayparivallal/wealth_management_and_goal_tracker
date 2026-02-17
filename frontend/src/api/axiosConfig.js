@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -29,12 +29,12 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401) {
             // Check if we're not already on login page
             const isLoginPage = window.location.pathname === "/" || window.location.pathname === "/login";
-            
+
             if (!isLoginPage) {
                 // Clear auth data
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("token_type");
-                
+
                 // Show toast notification
                 toast.error("Session expired. Please login again.", {
                     position: "top-right",
@@ -44,7 +44,7 @@ axiosInstance.interceptors.response.use(
                     pauseOnHover: true,
                     draggable: true,
                 });
-                
+
                 // Use setTimeout to ensure toast shows before redirect
                 setTimeout(() => {
                     window.location.replace("/login");

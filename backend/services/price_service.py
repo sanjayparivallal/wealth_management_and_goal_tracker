@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Redis configuration
+REDIS_URL = os.getenv("REDIS_URL")
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
@@ -31,14 +32,21 @@ class PriceService:
     def _connect_redis(self):
         """Initialize Redis connection."""
         try:
-            self.redis_client = redis.Redis(
-                host=REDIS_HOST,
-                port=REDIS_PORT,
-                db=REDIS_DB,
-                password=REDIS_PASSWORD,
-                decode_responses=True,
-                socket_connect_timeout=5
-            )
+            if REDIS_URL:
+                self.redis_client = redis.from_url(
+                    REDIS_URL,
+                    decode_responses=True,
+                    socket_connect_timeout=5
+                )
+            else:
+                self.redis_client = redis.Redis(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    db=REDIS_DB,
+                    password=REDIS_PASSWORD,
+                    decode_responses=True,
+                    socket_connect_timeout=5
+                )
             # Test connection
             self.redis_client.ping()
             print("✅ Redis connected successfully")

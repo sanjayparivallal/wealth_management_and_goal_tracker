@@ -1,9 +1,30 @@
+# Python
 venv/
-.env
 __pycache__/
 *.pyc
-backend/db_init.py
-node_modules/
+*.pyo
+
+# Environment
 .env
-venv/
-__pycache__/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+backend/db_init.py
+backup.sql
+backend/backup.sql
+backend/create_backup.py
+backend/verify_migration.py
+verify_migration.py
+tables.txt
+redis/
