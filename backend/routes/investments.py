@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from database import get_db_connection
 from schema import InvestmentCreate
 from security import get_current_user
@@ -182,7 +182,30 @@ def refresh_all_prices(current_user: dict = Depends(get_current_user)):
     }
 
 
-# Endpoint removed
+
+@router.post("/trigger-update")
+def trigger_price_update(x_cron_secret: str = Header(None, alias="X-Cron-Secret")):
+    """
+    Secure endpoint to trigger price updates from GitHub Actions.
+    Requires X-Cron-Secret header matching the CRON_SECRET env var.
+    """
+    import os
+    expected_secret = os.getenv("CRON_SECRET")
+    
+    if not expected_secret:
+        raise HTTPException(status_code=500, detail="CRON_SECRET not configured on server")
+        
+    if x_cron_secret != expected_secret:
+        # Use a generic error to avoid leaking existence
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    result = update_all_investment_prices()
+    
+    return {
+        "message": "Price update triggered successfully",
+        "result": result
+    }
+
 
 
 
