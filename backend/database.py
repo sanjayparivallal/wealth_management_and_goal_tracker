@@ -7,20 +7,81 @@ import os
 load_dotenv()
 
 
-def get_db_connection():
-    database_url = os.getenv("DATABASE_URL")
-    if database_url:
-        return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+from psycopg2 import pool
 
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        sslmode=os.getenv("DB_SSLMODE", "prefer"),
-        cursor_factory=RealDictCursor
-    )
+# Global pool variable
+pg_pool = None
+
+def init_db_pool():
+    """Initialize the database connection pool."""
+    global pg_pool
+    if pg_pool is None:
+        try:
+            database_url = os.getenv("DATABASE_URL")
+            if database_url:
+                pg_pool = pool.SimpleConnectionPool(
+                    minconn=1,
+                    maxconn=20,
+                    dsn=database_url,
+                    cursor_factory=RealDictCursor
+                )
+            else:
+                pg_pool = pool.SimpleConnectionPool(
+                    minconn=1,
+                    maxconn=20,
+                    host=os.getenv("DB_HOST"),
+                    port=os.getenv("DB_PORT"),
+                    database=os.getenv("DB_NAME"),
+                    user=os.getenv("DB_USER"),
+                    password=os.getenv("DB_PASSWORD"),
+                    sslmode=os.getenv("DB_SSLMODE", "prefer"),
+                    cursor_factory=RealDictCursor
+                )
+            print("✅ Database connection pool initialized")
+        except Exception as e:
+            print(f"❌ Error initializing database pool: {e}")
+            raise e
+
+def close_db_pool():
+    """Close all connections in the pool."""
+    global pg_pool
+    if pg_pool:
+        pg_pool.closeall()
+        print("✅ Database connection pool closed")
+
+
+class ConnectionWrapper:
+    """
+    Wraps a psycopg2 connection to intercept .close() calls.
+    Instead of closing the connection, it returns it to the pool.
+    """
+    def __init__(self, conn, pool):
+        self.conn = conn
+        self.pool = pool
+
+    def close(self):
+        """Return connection to the pool instead of closing it."""
+        if self.conn and self.pool:
+            self.pool.putconn(self.conn)
+            self.conn = None
+
+    def __getattr__(self, name):
+        """Delegate all other attribute access to the underlying connection."""
+        return getattr(self.conn, name)
+
+
+def get_db_connection():
+    """
+    Get a connection from the global pool.
+    Returns a ConnectionWrapper that puts the connection back in the pool on .close().
+    """
+    global pg_pool
+    if not pg_pool:
+        # Fallback if pool is not initialized (e.g. scripts)
+        init_db_pool()
+    
+    conn = pg_pool.getconn()
+    return ConnectionWrapper(conn, pg_pool)
 
 
 def create_tables():

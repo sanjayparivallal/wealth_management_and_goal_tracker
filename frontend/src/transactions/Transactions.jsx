@@ -88,7 +88,7 @@ export default function Transactions() {
             toast.success("Transaction recorded successfully");
             setShowModal(false);
             resetForm();
-            fetchData();
+            fetchTransactions();
         } catch (err) {
             toast.error(err.message);
         }

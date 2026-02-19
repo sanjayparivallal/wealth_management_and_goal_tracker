@@ -43,9 +43,7 @@ export default function TransactionForm({ formData, setFormData, onSubmit, onCan
                         >
                             <option value="buy">📈 Buy</option>
                             <option value="sell">📉 Sell</option>
-                            <option value="dividend">💰 Dividend</option>
-                            <option value="contribution">➕ Contribution</option>
-                            <option value="withdrawal">➖ Withdrawal</option>
+                            
                         </select>
                         <label
                             htmlFor="type"

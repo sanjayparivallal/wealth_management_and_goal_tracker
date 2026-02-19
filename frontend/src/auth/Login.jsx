@@ -27,10 +27,7 @@ export default function Login() {
 
       if (res) {
         toast.success("Login successful 🎉");
-
-        setTimeout(() => {
-          navigate("/home");
-        }, 1000);
+        navigate("/home");
       }
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
