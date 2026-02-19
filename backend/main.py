@@ -15,17 +15,19 @@ from routes.profile import router as profile_router
 from routes.simulations import router as simulations_router
 from routes.dashboard import router as dashboard_router
 from routes.recommendations import router as recommendations_router
-from database import get_db_connection
+from database import get_db_connection, init_db_pool, close_db_pool
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan - startup and shutdown events."""
     # Startup
     print("📦 Starting application...")
+    init_db_pool()
     # Celery worker handles background tasks now
     yield
     # Shutdown
     print("🛑 Shutting down application...")
+    close_db_pool()
 
 
 app = FastAPI(lifespan=lifespan)

@@ -28,13 +28,7 @@ export default function Signup() {
       const res = await signupUser({ name, email, password });
       if (res) {
         toast.success("Signup successful 🎉 Redirecting to login...");
-        setName("");
-        setEmail("");
-        setPassword("");
-        
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
+        navigate("/login");
       }
     } catch (err) {
       toast.error(err.message || "Signup failed. Please try again.");
@@ -101,10 +95,9 @@ export default function Signup() {
                 disabled={!isStrongPassword || loading}
                 tabIndex={4}
                 className={`w-full py-2.5 rounded-xl font-semibold shadow-lg transition-all transform
-                  ${
-                    isStrongPassword && !loading
-                      ? "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white hover:shadow-xl hover:scale-[1.02]"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ${isStrongPassword && !loading
+                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white hover:shadow-xl hover:scale-[1.02]"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
               >
                 {loading ? "Creating Account..." : "Create Account"}
