@@ -1,13 +1,15 @@
 import { useState } from "react";
 
-export default function PasswordInput({ 
-    value, 
-    onChange, 
+export default function PasswordInput({
+    value,
+    onChange,
     placeholder = "Enter password",
     label = "Password",
     showRulesOnFocus = true,
     required = true,
-    autoComplete = "new-password"
+    autoComplete = "new-password",
+    id = "password",
+    name = "password"
 }) {
     const [showPassword, setShowPassword] = useState(false);
     const [showRules, setShowRules] = useState(false);
@@ -24,12 +26,14 @@ export default function PasswordInput({
     return (
         <div>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
                     {label}
                 </label>
             )}
             <div className="relative">
                 <input
+                    id={id}
+                    name={name}
                     type={showPassword ? "text" : "password"}
                     placeholder={placeholder}
                     value={value}
@@ -78,9 +82,8 @@ export default function PasswordInput({
 function PasswordRule({ passed, text, className = "" }) {
     return (
         <div className={`flex items-center space-x-1.5 ${className}`}>
-            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                passed ? "bg-green-500" : "bg-gray-300"
-            }`}>
+            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${passed ? "bg-green-500" : "bg-gray-300"
+                }`}>
                 {passed && (
                     <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
