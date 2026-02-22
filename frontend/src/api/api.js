@@ -22,3 +22,13 @@ export const submitRiskAssessment = async (answers, userId, kycStatus) => {
     throw error;
   }
 };
+
+export const getDashboardAggregate = async () => {
+  try {
+    const response = await axiosInstance.get("/dashboard/aggregate");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard aggregate data:", error);
+    throw error;
+  }
+};

@@ -7,9 +7,7 @@ import Card from "../common/Card";
 import { DashboardIcon, RiskIcon, TargetIcon, CheckIcon, MoneyIcon, InvestmentIcon, TrendingUpIcon, TransactionIcon, ChartIcon, CalendarIcon, RefreshIcon } from "../common/Icons";
 import { DashboardSkeleton } from "../common/Skeleton";
 import DashboardCharts from "./DashboardCharts";
-import { getGoals } from "../api/goals";
-import { getInvestments, getInvestmentSummary } from "../api/investments";
-import { getTransactions, getTransactionSummary } from "../api/transactions";
+import { getDashboardAggregate } from "../api/api";
 
 function Home() {
   const navigate = useNavigate();
@@ -20,24 +18,22 @@ function Home() {
   const [investmentSummary, setInvestmentSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [transactionSummary, setTransactionSummary] = useState(null);
+  const [aggregateData, setAggregateData] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userData, goalsData, investmentsData, investmentSummaryData, transactionsData, transactionSummaryData] = await Promise.all([
+        const [userData, aggregateRawData] = await Promise.all([
           getCurrentUser(),
-          getGoals(),
-          getInvestments(),
-          getInvestmentSummary(),
-          getTransactions(),
-          getTransactionSummary()
+          getDashboardAggregate()
         ]);
         setUser(userData);
-        setGoals(goalsData);
-        setInvestments(investmentsData);
-        setInvestmentSummary(investmentSummaryData);
-        setTransactions(transactionsData);
-        setTransactionSummary(transactionSummaryData);
+        setAggregateData(aggregateRawData);
+        setGoals(aggregateRawData.goals || []);
+        setInvestments(aggregateRawData.investments || []);
+        setInvestmentSummary(aggregateRawData.investment_summary || null);
+        setTransactions(aggregateRawData.transactions || []);
+        setTransactionSummary(aggregateRawData.transaction_summary || null);
       } catch (err) {
         toast.error("Failed to fetch data");
         navigate("/login");
@@ -167,7 +163,7 @@ function Home() {
         </Card>
 
         {/* Charts Section */}
-        <DashboardCharts />
+        {aggregateData && <DashboardCharts aggregateData={aggregateData} />}
 
         {/* Goals Stats Section */}
         <div className="mb-8">

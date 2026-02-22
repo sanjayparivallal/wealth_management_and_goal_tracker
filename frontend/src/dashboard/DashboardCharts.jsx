@@ -8,8 +8,6 @@ import {
 } from 'recharts';
 import Card from '../common/Card';
 import { ChartIcon, TargetIcon, InvestmentIcon, TrendingUpIcon } from '../common/Icons';
-import axiosInstance from '../api/axiosConfig';
-
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -34,43 +32,17 @@ const EmptyState = ({ icon: Icon, iconColor, bgColor, title, description }) => (
 );
 
 
-export const DashboardCharts = () => {
-    const [allHistoryData, setAllHistoryData] = useState([]);
-    const [allocationData, setAllocationData] = useState([]);
-    const [summaryData, setSummaryData] = useState({ invested: 0, current: 0 });
-    const [goalsProgressData, setGoalsProgressData] = useState([]);
-    const [loading, setLoading] = useState(true);
+export const DashboardCharts = ({ aggregateData }) => {
+    const allHistoryData = aggregateData?.history || [];
+    const allocationData = aggregateData?.allocation || [];
+    const summaryData = aggregateData?.dashboard_summary || { invested: 0, current: 0 };
+    const goalsProgressData = aggregateData?.goals_progress || [];
+
+    const loading = !aggregateData;
+    const error = null;
+
     const [selectedPeriod, setSelectedPeriod] = useState('1M');
     const [summaryPeriod, setSummaryPeriod] = useState('ALL');
-
-    const [error, setError] = useState(null);
-
-    // Fetch all data once on mount (history with ALL to get full range)
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                const [historyRes, allocationRes, summaryRes, goalsRes] = await Promise.all([
-                    axiosInstance.get('/dashboard/history?period=ALL'),
-                    axiosInstance.get('/dashboard/allocation'),
-                    axiosInstance.get('/dashboard/summary'),
-                    axiosInstance.get('/dashboard/goals-progress')
-                ]);
-
-                setAllHistoryData(historyRes.data);
-                setAllocationData(allocationRes.data);
-                setSummaryData(summaryRes.data);
-                setGoalsProgressData(goalsRes.data);
-                setError(null);
-            } catch (err) {
-                console.error("Error fetching dashboard data:", err);
-                setError(err.response?.data?.detail || err.message || "Failed to load dashboard data");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardData();
-    }, []);
 
     // Client-side filter: slice history data based on selectedPeriod
     const historyData = React.useMemo(() => {
