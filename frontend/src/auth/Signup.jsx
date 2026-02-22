@@ -49,11 +49,13 @@ export default function Signup() {
 
             <form className="space-y-3" onSubmit={handleSubmit} autoComplete="on">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
                 </label>
                 <input
                   type="text"
+                  id="name"
+                  name="name"
                   placeholder="John Doe"
                   value={name}
                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl
@@ -66,11 +68,13 @@ export default function Signup() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
                 </label>
                 <input
                   type="email"
+                  id="email"
+                  name="email"
                   placeholder="you@example.com"
                   value={email}
                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl
@@ -83,6 +87,8 @@ export default function Signup() {
               </div>
 
               <PasswordInput
+                id="password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 label="Password"

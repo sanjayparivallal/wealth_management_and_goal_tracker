@@ -91,11 +91,13 @@ export default function Login() {
 
             <form className="space-y-6" onSubmit={handleSubmit} autoComplete="on">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
                 <input
                   type="email"
+                  id="email"
+                  name="email"
                   placeholder="you@example.com"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl
                            focus:outline-none focus:border-blue-500 transition-colors"
@@ -107,12 +109,14 @@ export default function Login() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
                     placeholder="Enter your password"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl
                              focus:outline-none focus:border-blue-500 transition-colors"
