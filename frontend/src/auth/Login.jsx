@@ -89,15 +89,15 @@ export default function Login() {
               <p className="text-gray-600">Access your wealth management dashboard</p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit} autoComplete="on">
+            <form id="login-form" className="space-y-6" onSubmit={handleSubmit} autoComplete="on">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  id="email"
-                  name="email"
+                  id="login-email"
+                  name="login-email"
                   placeholder="you@example.com"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl
                            focus:outline-none focus:border-blue-500 transition-colors"
@@ -109,14 +109,14 @@ export default function Login() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
+                    id="login-password"
+                    name="login-password"
                     placeholder="Enter your password"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl
                              focus:outline-none focus:border-blue-500 transition-colors"
