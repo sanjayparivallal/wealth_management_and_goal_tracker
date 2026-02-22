@@ -47,15 +47,15 @@ export default function Signup() {
               <p className="text-gray-600 text-sm">Start your wealth management journey today</p>
             </div>
 
-            <form className="space-y-3" onSubmit={handleSubmit} autoComplete="on">
+            <form id="signup-form" className="space-y-3" onSubmit={handleSubmit} autoComplete="on">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="signup-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
+                  id="signup-name"
+                  name="signup-name"
                   placeholder="John Doe"
                   value={name}
                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl
@@ -68,13 +68,13 @@ export default function Signup() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  id="email"
-                  name="email"
+                  id="signup-email"
+                  name="signup-email"
                   placeholder="you@example.com"
                   value={email}
                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl
@@ -87,8 +87,8 @@ export default function Signup() {
               </div>
 
               <PasswordInput
-                id="password"
-                name="password"
+                id="signup-password"
+                name="signup-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 label="Password"
