@@ -79,7 +79,47 @@ export const TableSkeleton = ({ rows = 5, columns = 5 }) => (
     </div>
 );
 
-// Dashboard Page Skeleton
+// Dashboard content-only skeleton (no Navbar) — for use inside page shell
+export const DashboardContentSkeleton = () => (
+    <div className="space-y-8 animate-pulse">
+        {/* Welcome Section Skeleton */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-3">
+                    <div className="h-8 bg-gray-200 rounded-lg w-64"></div>
+                    <div className="h-5 bg-gray-100 rounded-lg w-96 max-w-full"></div>
+                </div>
+                <div className="hidden md:flex items-center gap-6">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-12 w-20 bg-gray-100 rounded-lg"></div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* Charts Section Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[...Array(2)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-80">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="h-6 bg-gray-200 rounded w-48"></div>
+                        <div className="h-8 bg-gray-100 rounded w-24"></div>
+                    </div>
+                    <div className="h-56 bg-gray-100 rounded-xl w-full"></div>
+                </div>
+            ))}
+        </div>
+
+        {/* Stats Cards — 3 rows of 4 */}
+        {[...Array(3)].map((_, row) => (
+            <div key={row} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => <CardSkeleton key={i} />)}
+            </div>
+        ))}
+    </div>
+);
+
+// Dashboard Page Skeleton (full page including Navbar)
 export const DashboardSkeleton = () => (
     <div className="min-h-screen bg-gray-50">
         <NavbarSkeleton />
@@ -129,7 +169,24 @@ export const DashboardSkeleton = () => (
     </div>
 );
 
-// Goals Page Skeleton
+// Goals content-only skeleton (no Navbar)
+export const GoalsContentSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+            <div className="h-8 bg-gray-200 rounded w-48"></div>
+            <div className="h-11 bg-gray-200 rounded-xl w-40"></div>
+        </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+        {/* Table */}
+        <TableSkeleton rows={5} columns={6} />
+    </div>
+);
+
+// Goals Page Skeleton (full page)
 export const GoalsSkeleton = () => (
     <div className="min-h-screen bg-gray-50">
         <NavbarSkeleton />
@@ -157,7 +214,23 @@ export const GoalsSkeleton = () => (
     </div>
 );
 
-// Investments Page Skeleton
+// Investments content-only skeleton (no Navbar)
+export const InvestmentsContentSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+        {/* Header */}
+        <div className="h-8 bg-gray-200 rounded w-56"></div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+        {/* Filter bar */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 h-14"></div>
+        {/* Table */}
+        <TableSkeleton rows={5} columns={7} />
+    </div>
+);
+
+// Investments Page Skeleton (full page)
 export const InvestmentsSkeleton = () => (
     <div className="min-h-screen bg-gray-50">
         <NavbarSkeleton />
@@ -185,7 +258,29 @@ export const InvestmentsSkeleton = () => (
     </div>
 );
 
-// Transactions Page Skeleton
+// Transactions content-only skeleton (no Navbar)
+export const TransactionsContentSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+            <div className="h-8 bg-gray-200 rounded w-56"></div>
+            <div className="flex gap-3">
+                <div className="h-10 w-28 bg-gray-200 rounded-lg"></div>
+                <div className="h-10 w-36 bg-gray-200 rounded-lg"></div>
+            </div>
+        </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+        {/* Filter bar */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 h-14"></div>
+        {/* Table */}
+        <TableSkeleton rows={6} columns={6} />
+    </div>
+);
+
+// Transactions Page Skeleton (full page)
 export const TransactionsSkeleton = () => (
     <div className="min-h-screen bg-gray-50">
         <NavbarSkeleton />
