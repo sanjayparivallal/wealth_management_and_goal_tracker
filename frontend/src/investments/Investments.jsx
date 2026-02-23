@@ -8,7 +8,7 @@ import InvestmentForm from "./InvestmentForm";
 import { getInvestments, updateInvestment, getInvestmentSummary } from "../api/investments";
 import { getCurrentUser } from "../api/auth";
 import { InvestmentIcon, DownloadIcon } from "../common/Icons";
-import { InvestmentsSkeleton } from "../common/Skeleton";
+import { InvestmentsContentSkeleton } from "../common/Skeleton";
 
 export default function Investments() {
     const navigate = useNavigate();
@@ -62,10 +62,6 @@ export default function Investments() {
     useEffect(() => {
         checkProfileAndFetch();
     }, []);
-
-    if (loading) {
-        return <InvestmentsSkeleton />;
-    }
 
 
     const handleSubmit = async (e) => {
@@ -176,79 +172,83 @@ export default function Investments() {
             <Navbar />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fadeIn">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-3">
-                        <InvestmentIcon className="w-8 h-8 text-indigo-600" />
-                        <h1 className="text-2xl font-bold text-gray-900">Investment Portfolio</h1>
-                    </div>
-                </div>
-
-                {/* Summary Cards */}
-                <InvestmentSummaryCards summary={summary} />
-
-                {/* Filter Bar */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-                    <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-                        {/* Search */}
-                        <div className="relative w-full md:w-64">
-                            <input
-                                type="text"
-                                placeholder="Search symbol..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                {loading ? <InvestmentsContentSkeleton /> : (
+                    <>
+                        {/* Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <InvestmentIcon className="w-8 h-8 text-indigo-600" />
+                                <h1 className="text-2xl font-bold text-gray-900">Investment Portfolio</h1>
+                            </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                            {/* Asset Filter */}
-                            <select
-                                className="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                                value={filterAsset}
-                                onChange={(e) => setFilterAsset(e.target.value)}
-                            >
-                                <option value="all">All Assets</option>
-                                <option value="stock">Stocks</option>
-                                <option value="etf">ETFs</option>
-                                <option value="crypto">Crypto</option>
-                                <option value="bond">Bonds</option>
-                                <option value="mutual_fund">Mutual Funds</option>
-                            </select>
+                        {/* Summary Cards */}
+                        <InvestmentSummaryCards summary={summary} />
 
-                            {/* Sort */}
-                            <select
-                                className="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                                value={sortOrder}
-                                onChange={(e) => setSortOrder(e.target.value)}
-                            >
-                                <option value="value_desc">High Value</option>
-                                <option value="value_asc">Low Value</option>
-                                <option value="newest">Newest Added</option>
-                                <option value="a_z">Name (A-Z)</option>
-                            </select>
+                        {/* Filter Bar */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
+                            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                                {/* Search */}
+                                <div className="relative w-full md:w-64">
+                                    <input
+                                        type="text"
+                                        placeholder="Search symbol..."
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
 
-                            {/* Export Button */}
-                            <button
-                                onClick={handleExport}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                <DownloadIcon className="w-4 h-4" />
-                                Export
-                            </button>
+                                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                                    {/* Asset Filter */}
+                                    <select
+                                        className="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                                        value={filterAsset}
+                                        onChange={(e) => setFilterAsset(e.target.value)}
+                                    >
+                                        <option value="all">All Assets</option>
+                                        <option value="stock">Stocks</option>
+                                        <option value="etf">ETFs</option>
+                                        <option value="crypto">Crypto</option>
+                                        <option value="bond">Bonds</option>
+                                        <option value="mutual_fund">Mutual Funds</option>
+                                    </select>
+
+                                    {/* Sort */}
+                                    <select
+                                        className="pl-3 pr-8 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                                        value={sortOrder}
+                                        onChange={(e) => setSortOrder(e.target.value)}
+                                    >
+                                        <option value="value_desc">High Value</option>
+                                        <option value="value_asc">Low Value</option>
+                                        <option value="newest">Newest Added</option>
+                                        <option value="a_z">Name (A-Z)</option>
+                                    </select>
+
+                                    {/* Export Button */}
+                                    <button
+                                        onClick={handleExport}
+                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        <DownloadIcon className="w-4 h-4" />
+                                        Export
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Investments Table */}
-                <InvestmentsTable
-                    investments={filteredInvestments}
-                    onEdit={handleEdit}
-                    loading={loading}
-                />
+                        {/* Investments Table */}
+                        <InvestmentsTable
+                            investments={filteredInvestments}
+                            onEdit={handleEdit}
+                            loading={loading}
+                        />
+                    </>
+                )}
             </main>
 
             {/* Modal */}

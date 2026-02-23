@@ -8,7 +8,7 @@ import GoalForm from "./GoalForm";
 import { getGoals, createGoal, updateGoal, deleteGoal } from "../api/goals";
 import { getCurrentUser } from "../api/auth";
 import { TargetIcon, CheckIcon, MoneyIcon, CalendarIcon, PlusIcon } from "../common/Icons";
-import { GoalsSkeleton } from "../common/Skeleton";
+import { GoalsContentSkeleton } from "../common/Skeleton";
 
 export default function Goals() {
     const navigate = useNavigate();
@@ -53,9 +53,6 @@ export default function Goals() {
         checkProfileAndFetch();
     }, []);
 
-    if (loading) {
-        return <GoalsSkeleton />;
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -137,82 +134,86 @@ export default function Goals() {
             <Navbar />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header & Add Button */}
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-3">
-                        <TargetIcon className="w-8 h-8 text-blue-600" />
-                        <h1 className="text-2xl font-bold text-gray-900">Financial Goals</h1>
-                    </div>
-                    <button
-                        onClick={() => {
-                            setEditingGoal(null);
-                            resetForm();
-                            setShowModal(true);
-                        }}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-lg"
-                    >
-                        <PlusIcon className="w-5 h-5" />
-                        Add New Goal
-                    </button>
-                </div>
+                {loading ? <GoalsContentSkeleton /> : (
+                    <>
+                        {/* Header & Add Button */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <TargetIcon className="w-8 h-8 text-blue-600" />
+                                <h1 className="text-2xl font-bold text-gray-900">Financial Goals</h1>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setEditingGoal(null);
+                                    resetForm();
+                                    setShowModal(true);
+                                }}
+                                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-lg"
+                            >
+                                <PlusIcon className="w-5 h-5" />
+                                Add New Goal
+                            </button>
+                        </div>
 
-                {/* Stats Cards */}
-                {!loading && goals.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        <Card className="border-l-4 border-l-gray-500">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-100 rounded-lg">
-                                    <TargetIcon className="w-6 h-6 text-gray-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-gray-500 text-sm font-medium">Total Goals</h3>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.totalGoals}</p>
-                                </div>
+                        {/* Stats Cards */}
+                        {!loading && goals.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                                <Card className="border-l-4 border-l-gray-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-gray-100 rounded-lg">
+                                            <TargetIcon className="w-6 h-6 text-gray-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-gray-500 text-sm font-medium">Total Goals</h3>
+                                            <p className="text-2xl font-bold text-gray-900">{stats.totalGoals}</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                                <Card className="border-l-4 border-l-blue-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-100 rounded-lg">
+                                            <CheckIcon className="w-6 h-6 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-gray-500 text-sm font-medium">Active Goals</h3>
+                                            <p className="text-2xl font-bold text-blue-600">{stats.activeGoals}</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                                <Card className="border-l-4 border-l-green-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-green-100 rounded-lg">
+                                            <MoneyIcon className="w-6 h-6 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-gray-500 text-sm font-medium">Total Target</h3>
+                                            <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalTargetAmount)}</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                                <Card className="border-l-4 border-l-purple-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-purple-100 rounded-lg">
+                                            <CalendarIcon className="w-6 h-6 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-gray-500 text-sm font-medium">Monthly</h3>
+                                            <p className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalMonthlyContribution)}</p>
+                                        </div>
+                                    </div>
+                                </Card>
                             </div>
-                        </Card>
-                        <Card className="border-l-4 border-l-blue-500">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <CheckIcon className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-gray-500 text-sm font-medium">Active Goals</h3>
-                                    <p className="text-2xl font-bold text-blue-600">{stats.activeGoals}</p>
-                                </div>
-                            </div>
-                        </Card>
-                        <Card className="border-l-4 border-l-green-500">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-100 rounded-lg">
-                                    <MoneyIcon className="w-6 h-6 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-gray-500 text-sm font-medium">Total Target</h3>
-                                    <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalTargetAmount)}</p>
-                                </div>
-                            </div>
-                        </Card>
-                        <Card className="border-l-4 border-l-purple-500">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 rounded-lg">
-                                    <CalendarIcon className="w-6 h-6 text-purple-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-gray-500 text-sm font-medium">Monthly</h3>
-                                    <p className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalMonthlyContribution)}</p>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
+                        )}
+
+                        {/* Goals Table */}
+                        <GoalsTable
+                            goals={goals}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            loading={loading}
+                        />
+                    </>
                 )}
-
-                {/* Goals Table */}
-                <GoalsTable
-                    goals={goals}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    loading={loading}
-                />
             </main>
 
             {/* Modal */}
