@@ -25,22 +25,41 @@ function Home() {
 
     const fetchData = async () => {
       try {
-        const [userData, aggregateRawData] = await Promise.all([
+        const [userResult, aggregateResult] = await Promise.allSettled([
           getCurrentUser(),
           getDashboardAggregate()
         ]);
+
         if (!mounted) return;
-        setUser(userData);
-        setAggregateData(aggregateRawData);
-        setGoals(aggregateRawData.goals || []);
-        setInvestments(aggregateRawData.investments || []);
-        setInvestmentSummary(aggregateRawData.investment_summary || null);
-        setTransactions(aggregateRawData.transactions || []);
-        setTransactionSummary(aggregateRawData.transaction_summary || null);
-      } catch (err) {
-        if (!mounted) return;   // user already navigated away — do nothing
-        toast.error("Failed to fetch data");
-        navigate("/login");
+
+        if (userResult.status !== "fulfilled") {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        setUser(userResult.value);
+
+        if (aggregateResult.status === "fulfilled") {
+          const aggregateRawData = aggregateResult.value;
+          setAggregateData(aggregateRawData);
+          setGoals(aggregateRawData.goals || []);
+          setInvestments(aggregateRawData.investments || []);
+          setInvestmentSummary(aggregateRawData.investment_summary || null);
+          setTransactions(aggregateRawData.transactions || []);
+          setTransactionSummary(aggregateRawData.transaction_summary || null);
+        } else {
+          setAggregateData(null);
+          setGoals([]);
+          setInvestments([]);
+          setInvestmentSummary(null);
+          setTransactions([]);
+          setTransactionSummary(null);
+          toast.error("Dashboard data is taking longer than expected. Please refresh.");
+        }
+      } catch {
+        if (!mounted) return;
+        toast.error("Failed to load dashboard");
       } finally {
         if (mounted) setLoading(false);
       }
