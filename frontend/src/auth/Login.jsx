@@ -26,8 +26,8 @@ export default function Login() {
       const res = await loginUser({ email, password });
 
       if (res) {
+        navigate("/home", { replace: true });
         toast.success("Login successful 🎉");
-        navigate("/home");
       }
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
