@@ -31,6 +31,7 @@ export default function Login() {
       }
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
