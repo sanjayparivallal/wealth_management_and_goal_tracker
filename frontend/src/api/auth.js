@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/auth`;
+const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS || 30000);
 
 export const signupUser = async (data) => {
   try {
@@ -20,7 +21,8 @@ export const loginUser = async (data) => {
     const res = await axios.post(`${API_URL}/login`, formData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
-      }
+      },
+      timeout: API_TIMEOUT_MS,
     });
 
     // Store the token in localStorage
@@ -31,6 +33,12 @@ export const loginUser = async (data) => {
 
     return res.data;
   } catch (err) {
+    if (err.code === "ECONNABORTED") {
+      throw new Error("Login request timed out. Please try again in a few seconds.");
+    }
+    if (!err.response) {
+      throw new Error("Unable to reach server. Please check your internet or try again.");
+    }
     throw new Error(err.response?.data?.detail || "Login failed");
   }
 };
@@ -57,7 +65,8 @@ export const getCurrentUser = async () => {
     const res = await axios.get(`${API_URL}/me`, {
       headers: {
         Authorization: `Bearer ${token}`
-      }
+      },
+      timeout: API_TIMEOUT_MS,
     });
 
     return res.data;
